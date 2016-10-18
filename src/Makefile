@@ -7,17 +7,17 @@ CFLAGS = -O3 -finline-functions -Wall -Winline -funroll-loops -fexpensive-optimi
 #CFLAGS = -g -Wall -DDEBUG -DDEBUGDEBUG
 #CFLAGS = -pg -fPIC -O2 -finline-functions -Wall -Winline -funroll-loops -fexpensive-optimizations
 
-#LIBDIR = -L/usr/local/lib -L../lib
-LIBDIR = -L/usr/local/lib -L/sw/lib -L../lib -L/home/ntucc/platin/opt/lib
+LIBDIR = -L/usr/local/lib -L../lib
+#LIBDIR = -L/usr/local/lib -L/sw/lib -L../lib -L/home/ntucc/platin/opt/lib
 EXTRALIBS = -lqdas -lpthread -lgsl -lgslcblas -lm 
 #GSL_LAPACK = -lg2c -lblas -llapack
-INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I../lib -I/sw/include
-#INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I/sw/include -I../lib -I/home/ntucc/platin/opt/include
+#INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I../lib -I/sw/include
+INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I/sw/include -I../lib -I/home/ntucc/platin/opt/include
 
 INSTALL = /usr/bin/install -c
 BINDIR = /usr/local/chem/qdas
 
-BINARYS = tnl-dynamics tnl-dm3pes tnl-lineshape
+BINARYS = tnl-dynamics tnl-dm3pes tnl-lineshape CMRT
 OBJECTS = tnl-kern.o
 
 all: $(OBJECTS) $(BINARYS)
@@ -34,6 +34,9 @@ tnl-dm3pes: tnl-dm3pes.c tnl-dm3pes.h $(OBJECTS)
 tnl-lineshape: tnl-lineshape.c $(OBJECTS)
 	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-lineshape tnl-lineshape.c $(OBJECTS) $(EXTRALIBS)
 
+CMRT:	CMRT.c CMRT.h $(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o CMRT CMRT.c $(OBJECTS) $(EXTRALIBS)
+
 static: tnl-dynamics.c tnl-lineshape.c tnl-dynamics.h tnl-dm3pes.c tnl-dm3pes.h $(OBJECTS)
 	$(CC) -static $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dynamics tnl-dynamics.c $(OBJECTS) $(EXTRALIBS)
 	$(CC) -static $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dm3pes tnl-dm3pes.c $(OBJECTS) $(EXTRALIBS)
@@ -48,6 +51,9 @@ clean:
 
 #
 # $Log$
+# Revision 1.11.1 2015/10/17          dimsplendid
+# 	- add CMRT population trasfer part(need modifying)
+#
 # Revision 1.11  2007/07/15 04:51:18  platin
 #   - add info on RNG.
 #
