@@ -7,10 +7,11 @@ CFLAGS = -O3 -finline-functions -Wall -Winline -funroll-loops -fexpensive-optimi
 #CFLAGS = -g -DBATH_DEBUG
 
 #LIBDIR = -L/home/platin/x-prog/ycclib -L/usr/local/lib -L/sw/lib
-LIBDIR = -L/usr/local/lib64 -L.
+LIBDIR = -L/usr/local/lib -L.
 EXTRALIBS = -lqdas -lpthread -lgsl -lgslcblas -lm
 #GSL_LAPACK = -lg2c -lblas -llapack
-INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include
+INCLUDEDIR = -I/usr/local/include
+#INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include
 #INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I/sw/include -I/home/ntucc/platin/opt/include
 
 OBJECTS = aux.o spectrum.o bath_js03.o bath_htgau.o bath_mt99ohm.o bath_js03art.o bath_ohmart.o bath.o bathtype_mt99art.o params.o dmop.o parser.o qng2d.o gauss-hermite.o bath_mboart.o bath_mt99art.o spectrum2d.o linpolar.o samplelist.o bath_odbo.o

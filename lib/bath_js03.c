@@ -34,25 +34,26 @@
 #include "aux.h"
 #include "bath_js03.h"
 
+/* remove inline 2016 10 18:dimsplendid */
 /* Use the following inline gsl_ functions to optimize performance */
-inline gsl_complex fgsl_matrix_complex_get(const gsl_matrix_complex * m, 
+gsl_complex fgsl_matrix_complex_get(const gsl_matrix_complex * m, 
 					   const size_t i, const size_t j)
 {
   return *(gsl_complex *)(m->data + 2*(i * m->tda + j)) ;
 } 
 
-inline void fgsl_matrix_complex_set(gsl_matrix_complex * m, 
+void fgsl_matrix_complex_set(gsl_matrix_complex * m, 
 				    const size_t i, const size_t j, const gsl_complex x)
 {
   *(gsl_complex *)(m->data + 2*(i * m->tda + j)) = x ;
 }
 
-inline double fgsl_matrix_get(const gsl_matrix * m, const size_t i, const size_t j)
+double fgsl_matrix_get(const gsl_matrix * m, const size_t i, const size_t j)
 {
   return m->data[i * m->tda + j] ;
 } 
 
-inline void fgsl_matrix_set(gsl_matrix * m, const size_t i, const size_t j, const double x)
+void fgsl_matrix_set(gsl_matrix * m, const size_t i, const size_t j, const double x)
 {
   m->data[i * m->tda + j] = x ;
 }
@@ -87,7 +88,7 @@ gsl_matrix *BATH_JS03OpQ;
 gsl_vector *BATH_JS03Ct;
 
 // normalized spectral function taken from J&S
-inline double bath_js03_Jw(double omega, double wc)
+double bath_js03_Jw(double omega, double wc)
 {
   return ((0.5*omega+0.58*omega*omega/wc)*exp(-1.0*omega/wc));
 }
@@ -98,7 +99,7 @@ inline double bath_js03_Jw(double omega, double wc)
    unscaled values in the cache files.
 */
 /* real part of C(t) */
-inline double bath_js03_f_Ct_r(double w, void *params)
+double bath_js03_f_Ct_r(double w, void *params)
 {
   double aw;
   double tau,beta,wc;

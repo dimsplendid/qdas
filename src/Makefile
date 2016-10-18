@@ -7,15 +7,17 @@ CFLAGS = -O3 -finline-functions -Wall -Winline -funroll-loops -fexpensive-optimi
 #CFLAGS = -g -Wall -DDEBUG -DDEBUGDEBUG
 #CFLAGS = -pg -fPIC -O2 -finline-functions -Wall -Winline -funroll-loops -fexpensive-optimizations
 
-LIBDIR = -L/usr/local/lib -L../lib
+LIBDIR = -L../lib
+#LIBDIR = -L/usr/local/lib -L../lib
 #LIBDIR = -L/usr/local/lib -L/sw/lib -L../lib -L/home/ntucc/platin/opt/lib
 EXTRALIBS = -lqdas -lpthread -lgsl -lgslcblas -lm 
 #GSL_LAPACK = -lg2c -lblas -llapack
 #INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I../lib -I/sw/include
-INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I/sw/include -I../lib -I/home/ntucc/platin/opt/include
+#INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I/sw/include -I../lib -I/home/ntucc/platin/opt/include
+INCLUDEDIR = -I../lib
 
 INSTALL = /usr/bin/install -c
-BINDIR = /usr/local/chem/qdas
+BINDIR = /opt/qdas
 
 BINARYS = tnl-dynamics tnl-dm3pes tnl-lineshape CMRT
 OBJECTS = tnl-kern.o
