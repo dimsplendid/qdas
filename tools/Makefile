@@ -1,6 +1,9 @@
 # Make file for qas
 # By Yuan-Chung Cheng <yccheng@berkeley.edu>
 #
+# Modified: dimsplendid 2016 10 18 
+# give the execute file the file name extention ".run"
+#
 
 CC = gcc
 CFLAGS = -O2 -finline-functions -Wall -Winline -funroll-loops -fexpensive-optimizations
@@ -12,10 +15,10 @@ EXTRALIBS = -lqdas -lpthread -lgsl -lgslcblas -lm
 INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I/sw/include -I../lib
 
 OBJECTS = 
-BINARIES = cspline_max normalize 1cpeps 2c3ppes-hj 2c3ppes gau_max 2c3ppes-pi 2c3ppes-htgau 2dspec 2danalysis
+BINARIES = cspline_max.run normalize.run 1cpeps.run 2c3ppes-hj.run 2c3ppes.run gau_max.run 2c3ppes-pi.run 2c3ppes-htgau.run 2dspec.run 2danalysis.run
 
 INSTALL = /usr/bin/install -c
-BINDIR = /usr/local/chem/qdas
+BINDIR = /opt/qdas
 INSTALL_BINARIES = cspline_max normalize gau_max 2dspec 2danalysis
 
 all: $(OBJECTS) $(BINARIES)
@@ -23,35 +26,35 @@ all: $(OBJECTS) $(BINARIES)
 %.o : %.c %.h
 	$(CC) -c $(CFLAGS) $(INCLUDEDIR) $< -o $@
 
-cspline_max: cspline_max.c
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o cspline_max cspline_max.c $(EXTRALIBS)
+cspline_max.run: cspline_max.c
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o cspline_max.run cspline_max.c $(EXTRALIBS)
 
-gau_max: gau_max.c
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o gau_max gau_max.c $(EXTRALIBS)
+gau_max.run: gau_max.c
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o gau_max.run gau_max.c $(EXTRALIBS)
 
-normalize: normalize.c
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o normalize normalize.c $(EXTRALIBS)
+normalize.run: normalize.c
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o normalize.run normalize.c $(EXTRALIBS)
 
-1cpeps: 1cpeps.c $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 1cpeps 1cpeps.c $(EXTRALIBS)
+1cpeps.run: 1cpeps.c $(OBJECTS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 1cpeps.run 1cpeps.c $(EXTRALIBS)
 
-2c3ppes: 2c3ppes.c $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 2c3ppes 2c3ppes.c $(EXTRALIBS)
+2c3ppes.run: 2c3ppes.c $(OBJECTS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 2c3ppes.run 2c3ppes.c $(EXTRALIBS)
 
-2c3ppes-hj: 2c3ppes-hj.c $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 2c3ppes-hj 2c3ppes-hj.c $(EXTRALIBS)
+2c3ppes-hj.run: 2c3ppes-hj.c $(OBJECTS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 2c3ppes-hj.run 2c3ppes-hj.c $(EXTRALIBS)
 
-2c3ppes-pi: 2c3ppes-pi.c $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 2c3ppes-pi 2c3ppes-pi.c $(EXTRALIBS)
+2c3ppes-pi.run: 2c3ppes-pi.c $(OBJECTS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 2c3ppes-pi.run 2c3ppes-pi.c $(EXTRALIBS)
 
-2c3ppes-htgau: 2c3ppes-htgau.c $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 2c3ppes-htgau 2c3ppes-htgau.c $(EXTRALIBS)
+2c3ppes-htgau.run: 2c3ppes-htgau.c $(OBJECTS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 2c3ppes-htgau.run 2c3ppes-htgau.c $(EXTRALIBS)
 
-2dspec: 2dspec.c $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 2dspec 2dspec.c $(EXTRALIBS) -lfftw3 -lm
+2dspec.run: 2dspec.c $(OBJECTS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 2dspec.run 2dspec.c $(EXTRALIBS) -lfftw3 -lm
 
-2danalysis: 2danalysis.c $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 2danalysis 2danalysis.c $(EXTRALIBS) -lfftw3 -lm
+2danalysis.run: 2danalysis.c $(OBJECTS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o 2danalysis.run 2danalysis.c $(EXTRALIBS) -lfftw3 -lm
 
 install: all
 	mkdir -p $(BINDIR)

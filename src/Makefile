@@ -19,7 +19,7 @@ INCLUDEDIR = -I../lib
 INSTALL = /usr/bin/install -c
 BINDIR = /opt/qdas
 
-BINARYS = tnl-dynamics tnl-dm3pes tnl-lineshape CMRT
+BINARYS = tnl-dynamics.run tnl-dm3pes.run tnl-lineshape.run CMRT.run
 OBJECTS = tnl-kern.o
 
 all: $(OBJECTS) $(BINARYS)
@@ -27,22 +27,22 @@ all: $(OBJECTS) $(BINARYS)
 %.o : %.c %.h
 	$(CC) -c $(CFLAGS) $(INCLUDEDIR) $< -o $@
 
-tnl-dynamics: tnl-dynamics.c tnl-dynamics.h $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dynamics tnl-dynamics.c $(OBJECTS) $(EXTRALIBS)
+tnl-dynamics.run: tnl-dynamics.c tnl-dynamics.h $(OBJECTS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dynamics.run tnl-dynamics.c $(OBJECTS) $(EXTRALIBS)
 
-tnl-dm3pes: tnl-dm3pes.c tnl-dm3pes.h $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dm3pes tnl-dm3pes.c $(OBJECTS) $(EXTRALIBS)
+tnl-dm3pes.run: tnl-dm3pes.c tnl-dm3pes.h $(OBJECTS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dm3pes.run tnl-dm3pes.c $(OBJECTS) $(EXTRALIBS)
 
-tnl-lineshape: tnl-lineshape.c $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-lineshape tnl-lineshape.c $(OBJECTS) $(EXTRALIBS)
+tnl-lineshape.run: tnl-lineshape.c $(OBJECTS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-lineshape.run tnl-lineshape.c $(OBJECTS) $(EXTRALIBS)
 
-CMRT:	CMRT.c CMRT.h $(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o CMRT CMRT.c $(OBJECTS) $(EXTRALIBS)
+CMRT.run:	CMRT.c CMRT.h $(OBJECTS)
+		$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o CMRT.run CMRT.c $(OBJECTS) $(EXTRALIBS)
 
 static: tnl-dynamics.c tnl-lineshape.c tnl-dynamics.h tnl-dm3pes.c tnl-dm3pes.h $(OBJECTS)
-	$(CC) -static $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dynamics tnl-dynamics.c $(OBJECTS) $(EXTRALIBS)
-	$(CC) -static $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dm3pes tnl-dm3pes.c $(OBJECTS) $(EXTRALIBS)
-	$(CC) -static $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-lineshape tnl-lineshape.c $(OBJECTS) $(EXTRALIBS)
+	$(CC) -static $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dynamics_static.run tnl-dynamics.c $(OBJECTS) $(EXTRALIBS)
+	$(CC) -static $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dm3pes_static.run tnl-dm3pes.c $(OBJECTS) $(EXTRALIBS)
+	$(CC) -static $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-lineshape_static.run tnl-lineshape.c $(OBJECTS) $(EXTRALIBS)
 
 install: static
 	mkdir -p $(BINDIR)
