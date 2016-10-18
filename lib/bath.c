@@ -35,6 +35,7 @@
 #include "bath_mboart.h"
 #include "bath_mt99art.h"
 
+#include "bath_odbo.h"
 /* Constants that define the capacity of the program */
 #define MAX_BATH_NUMBERS (16)
 #define STR_BUFFER_SIZE (256)
@@ -108,6 +109,15 @@ void bath_mod_init()
   BathModulesList[6].description = strdup("Meier and Tannor's artificial bath model.");
   BathModulesList[6].f_init_params = bath_mt99art_init_params;
   BathModulesList[6].f_free_params = bath_mt99art_free_params;
+
+  // modified by Tseng Wei-Hsiang, used temperaly
+  BathModulesList[7].id = 7; // id should match index number
+  BathModulesList[7].keyword = strdup("ODBO");
+  BathModulesList[7].description = strdup("Over-damped Brownian Oscillators bath model.");
+  BathModulesList[7].f_init_params = bath_odbo_init_params;
+  BathModulesList[7].f_free_params = bath_odbo_free_params;
+
+
 
 }
 

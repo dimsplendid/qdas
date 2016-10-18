@@ -13,7 +13,7 @@ EXTRALIBS = -lqdas -lpthread -lgsl -lgslcblas -lm
 INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include
 #INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I/sw/include -I/home/ntucc/platin/opt/include
 
-OBJECTS = aux.o spectrum.o bath_js03.o bath_htgau.o bath_mt99ohm.o bath_js03art.o bath_ohmart.o bath.o bathtype_mt99art.o params.o dmop.o parser.o qng2d.o gauss-hermite.o bath_mboart.o bath_mt99art.o spectrum2d.o linpolar.o samplelist.o
+OBJECTS = aux.o spectrum.o bath_js03.o bath_htgau.o bath_mt99ohm.o bath_js03art.o bath_ohmart.o bath.o bathtype_mt99art.o params.o dmop.o parser.o qng2d.o gauss-hermite.o bath_mboart.o bath_mt99art.o spectrum2d.o linpolar.o samplelist.o bath_odbo.o
 
 all: $(OBJECTS) libqdas
 

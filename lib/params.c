@@ -1146,6 +1146,18 @@ int f_diagonaldynamics_()
   return 0;
 }
 
+/* Use for CMRT, over-damped BO */
+int f_lambda_0_()
+{
+  Keys->lambda_0=parser_next_double();
+  return 0;
+}
+int f_Gamma_0_()
+{
+  Keys->Gamma_0=parser_next_double();
+  return 0;
+}
+
 /* get dipole of a 1es state */
 void get_dipole(double *res, size_t state, size_t ndipoles, dipole *mu)
 {
@@ -1336,6 +1348,10 @@ void params_init(char *fname, qdas_keys *key)
 
   // about output detail level; default is 1, output limited stuff
   Keys->printlv=1;
+
+  // Use for CMRT, over-damped BO 
+  Keys->lambda_0 = 0;
+  Keys->Gamma_0 = 0;
 
   /* the parameter file */
   printf("\n");

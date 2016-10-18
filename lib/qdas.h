@@ -244,6 +244,10 @@ typedef struct {
 
   int diagonaldynamics; /* trun on the ad-hoc population-only dynamics for TNL module
 			   if(keys->diagonaldynamics == QDAS_SET_DIAGONAL_DYNAMICS) */
+
+  /* use for CMRT */
+  double lambda_0,Gamma_0;
+
 } qdas_keys;
 
 /* Global variables */
@@ -252,6 +256,9 @@ typedef struct {
 
 /*
  * $Log$
+ * Revision 1.18.1 2015/10/28 4:11 dimsplendid
+ *   - add over-damped BO option
+ *
  * Revision 1.18  2007/08/09 23:50:35  platin
  *   - implemented site localized extra population dynamics in TNL.
  *   - implemented the DIAGONALDYNAMICS method for population-only
