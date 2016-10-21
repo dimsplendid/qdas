@@ -36,15 +36,12 @@ double ggg_i(double tau,void * params);
 /* In this way, I just use a transform sum function.           */
 double transCoeff(gsl_matrix * eigenvectors ,int ,int, int, int);
 double kernel_F(double tau, void * p);
-/* aux function */
-double test_int(double p[]);
-double total_fun(gsl_matrix * m,double params[],int,int);
 
 #endif /* bath_odbo.h */
 
 /*
  * $Log$
- * Revision 0.1  2015/11/05 08:33:15  platin
+ * Revision 0.1  2015/11/05 08:33:15 dimsplendid
  *   - A simple over-damped Brownian Oscillators Bath
  *
  */

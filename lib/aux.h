@@ -1,6 +1,6 @@
 /***************************************************
  * aux.h
- * 
+ *
  * Header file for aux.c, useful aux functions.
  *
  * By Yuan-Chung Cheng <yuanchung@ntu.edu.tw>
@@ -19,7 +19,7 @@
 
 #include "qdas.h"
 
-// FIXME: put these in params.c !! 
+// FIXME: put these in params.c !!
 // N=8192 and delta_t=0.0001 translates into about 8 cm^-1 step in the spectrum
 #define FFT_2POWER (13)
 #define FFT_N (1 << FFT_2POWER)
@@ -65,6 +65,9 @@ void construct_Hamiltonian(gsl_matrix *H, const qdas_keys *keys, gsl_rng *r);
 void show_eigen(const gsl_matrix *H, gsl_matrix *mu);
 void sort_double_array_decend(size_t *ilist, const double *array, size_t N);
 void compute_eigen_map(size_t *map, const gsl_matrix *H0, const gsl_matrix *H1);
+
+/* for complex number: dimsplendid */
+void gsl_complex_print(gsl_complex);
 
 #endif /* aux.h */
 

@@ -36,12 +36,13 @@
 #include "bath_mt99art.h"
 
 #include "bath_odbo.h"
+#include "bath_mdfit.h"
 /* Constants that define the capacity of the program */
 #define MAX_BATH_NUMBERS (16)
 #define STR_BUFFER_SIZE (256)
 
 /* data structure to hold a "bath module" */
-struct bath_module_struct 
+struct bath_module_struct
 {
   int id;
   char *keyword;
@@ -110,14 +111,19 @@ void bath_mod_init()
   BathModulesList[6].f_init_params = bath_mt99art_init_params;
   BathModulesList[6].f_free_params = bath_mt99art_free_params;
 
-  // modified by Tseng Wei-Hsiang, used temperaly
+  // modified by dimsplendid, used for CMRT rate matrix cal
   BathModulesList[7].id = 7; // id should match index number
   BathModulesList[7].keyword = strdup("ODBO");
   BathModulesList[7].description = strdup("Over-damped Brownian Oscillators bath model.");
   BathModulesList[7].f_init_params = bath_odbo_init_params;
   BathModulesList[7].f_free_params = bath_odbo_free_params;
 
-
+  // modified by dimsplendid, used for MD fitting correation functions
+  BathModulesList[8].id = 8;
+  BathModulesList[8].keyword = strdup("MDFIT");
+  BathModulesList[8].description = strdup("MD fitting correlation function by 王佑仁.");
+  BathModulesList[8].f_init_params = bath_mdfit_init_params;
+  BathModulesList[8].f_free_params = bath_mdfit_free_params;
 
 }
 
@@ -184,4 +190,3 @@ char *bath_get_description(int id) {
     exit(EXIT_FAILURE);
   }
 }
-

@@ -3,7 +3,7 @@
  *
  * Part of the qdas package;
  * Over-damped Brownian Oscillators bath module.
- * 
+ *
  * By Tseng Wei-Hsiang <dimsplendid@gmail.com>
  *
  ***************************************************/
@@ -41,7 +41,7 @@ double BathODBOLambda;
 double BathODBOGAMMA;
 
 /* lineshape functions */
-inline double J(double omega, void * params){
+double J(double omega, void * params){
   /* Over-damped Brownian oscillators */
   /* in this condition, I don't use this */
   double result;
@@ -71,7 +71,7 @@ double transCoeff(gsl_matrix * evec ,int a,int b,int c,int d){
     // printf("%.2f %.2f %.2f %.2f\n",a_i,b_i,c_j,d_j);
     coeff = a_i * b_i * c_j * d_j;
     result += coeff;
-  }  
+  }
   // printf("C_%d%d%d%d = %.6f\n",a,b,c,d,result);
   return result;
 }
@@ -154,7 +154,7 @@ double ggg_r(double tau,void * params){
   Gamma0 = p[2];
   cotx = p[3];
 
-  // Mazbara term sum 1..5
+  // Mazbara term sum 1..100
   for(i = 0; i < 100; i++){
     result += (4*i*PI/beta/beta)*\
       exp(-2*i*PI/beta*tau)/\
@@ -191,13 +191,15 @@ double kernel_F(double tau, void * p){
   double C_bbaa = params[11];
   double C_aaaa = params[12];
   double C_bbbb = params[13];
-  // result = exp((2*C_bbaa-C_aaaa-C_bbbb)*g_r(tau,params))\
-  //   *((((C_baab*ggg_r(tau,params)-(C_aaba-C_bbba)*(C_aaab-C_bbab)*gg_r(tau,params)*gg_r(tau,params))\
-  //   +((C_aaba-C_bbba)*gg_i(tau,params)-2.0*C_bbba*lambda0)*((C_aaab-C_bbab)*gg_i(tau,params)-2.0*C_bbab*lambda0))\
-  //   *cos((2.0*C_bbaa-C_aaaa-C_bbbb)*g_i(tau,params)+(2.0*(C_bbaa-C_bbbb)*lambda0+(Eb-Ea))*tau))\
-  //   +((-C_baab*ggg_i(tau,params)+(C_aaba-C_bbba)*gg_r(tau,params)*((C_aaab-C_bbab)*gg_i(tau,params)-2.0*C_bbab*lambda0)\
-  //   +(C_aaab-C_bbab)*gg_r(tau,params)*((C_aaba-C_bbba)*gg_i(tau,params)-2.0*C_bbab*lambda0))\
-  //   *sin((2.0*C_bbaa-C_aaaa-C_bbbb)*g_i(tau,params)+(2.0*(C_bbaa-C_bbbb)*lambda0+(Eb-Ea))*tau)));
+  /*
+  result = exp((2*C_bbaa-C_aaaa-C_bbbb)*g_r(tau,params))\
+    *((((C_baab*ggg_r(tau,params)-(C_aaba-C_bbba)*(C_aaab-C_bbab)*gg_r(tau,params)*gg_r(tau,params))\
+    +((C_aaba-C_bbba)*gg_i(tau,params)-2.0*C_bbba*lambda0)*((C_aaab-C_bbab)*gg_i(tau,params)-2.0*C_bbab*lambda0))\
+    *cos((2.0*C_bbaa-C_aaaa-C_bbbb)*g_i(tau,params)+(2.0*(C_bbaa-C_bbbb)*lambda0+(Eb-Ea))*tau))\
+    +((-C_baab*ggg_i(tau,params)+(C_aaba-C_bbba)*gg_r(tau,params)*((C_aaab-C_bbab)*gg_i(tau,params)-2.0*C_bbab*lambda0)\
+    +(C_aaab-C_bbab)*gg_r(tau,params)*((C_aaba-C_bbba)*gg_i(tau,params)-2.0*C_bbab*lambda0))\
+    *sin((2.0*C_bbaa-C_aaaa-C_bbbb)*g_i(tau,params)+(2.0*(C_bbaa-C_bbbb)*lambda0+(Eb-Ea))*tau)));
+  */
   double G_r,G_i,H_r,H_i,C_r,C_i,cosx,sinx,Re_p,Im_p,expx;
   G_r = g_r(tau,params);
   G_i = g_i(tau,params);
@@ -213,13 +215,13 @@ double kernel_F(double tau, void * p){
         -(((C_aaba-C_bbba)*H_i - 2.0*C_bbba*lambda0)*((C_aaab-C_bbab)*H_i - 2.0*C_bbab*lambda0)));
   Im_p = C_baab*C_i - ((C_aaba - C_bbba)*H_r*((C_aaab-C_bbab)*H_i - 2.0*C_bbab*lambda0)\
         + ((C_aaba-C_bbba)*H_i - 2.0*C_bbba*lambda0)*(C_aaab - C_bbab)*H_r);
-  real_part = expx * (Re_p * cosx - Im_p * sinx); 
+  real_part = expx * (Re_p * cosx - Im_p * sinx);
   imag_part = expx * (Re_p * sinx + Im_p * cosx);
   return real_part;
 }
 
 /* interface functions */
-int bath_odbo_init_params(const size_t nsize, const double beta, 
+int bath_odbo_init_params(const size_t nsize, const double beta,
 			   const size_t bath_nparams, const double *bath_params)
 {
   int idx;
@@ -242,8 +244,7 @@ int bath_odbo_init_params(const size_t nsize, const double beta,
   return 0;
 }
 
-int bath_odbo_free_params()
-{
+int bath_odbo_free_params(){
   return 0;
 }
 

@@ -10,7 +10,7 @@ CFLAGS = -O3 -finline-functions -Wall -Winline -funroll-loops -fexpensive-optimi
 LIBDIR = -L../lib
 #LIBDIR = -L/usr/local/lib -L../lib
 #LIBDIR = -L/usr/local/lib -L/sw/lib -L../lib -L/home/ntucc/platin/opt/lib
-EXTRALIBS = -lqdas -lpthread -lgsl -lgslcblas -lm 
+EXTRALIBS = -lqdas -lpthread -lgsl -lgslcblas -lm
 #GSL_LAPACK = -lg2c -lblas -llapack
 #INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I../lib -I/sw/include
 #INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I/sw/include -I../lib -I/home/ntucc/platin/opt/include
@@ -19,7 +19,7 @@ INCLUDEDIR = -I../lib
 INSTALL = /usr/bin/install -c
 BINDIR = /opt/qdas
 
-BINARYS = tnl-dynamics.run tnl-dm3pes.run tnl-lineshape.run CMRT.run
+BINARYS = tnl-dynamics.run tnl-dm3pes.run tnl-lineshape.run CMRT.run MDCMRT.run
 OBJECTS = tnl-kern.o
 
 all: $(OBJECTS) $(BINARYS)
@@ -39,6 +39,9 @@ tnl-lineshape.run: tnl-lineshape.c $(OBJECTS)
 CMRT.run:	CMRT.c CMRT.h $(OBJECTS)
 		$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o CMRT.run CMRT.c $(OBJECTS) $(EXTRALIBS)
 
+MDCMRT.run:	MDCMRT.c MDCMRT.h $(OBJECTS)
+				$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o MDCMRT.run MDCMRT.c $(OBJECTS) $(EXTRALIBS)
+
 static: tnl-dynamics.c tnl-lineshape.c tnl-dynamics.h tnl-dm3pes.c tnl-dm3pes.h $(OBJECTS)
 	$(CC) -static $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dynamics_static.run tnl-dynamics.c $(OBJECTS) $(EXTRALIBS)
 	$(CC) -static $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dm3pes_static.run tnl-dm3pes.c $(OBJECTS) $(EXTRALIBS)
@@ -49,7 +52,7 @@ install: static
 	$(INSTALL) -m 755 $(BINARYS) $(BINDIR)
 
 clean:
-	rm -f $(BINARYS) *.o *.so *~ *.mo core a.out gmon.out 
+	rm -f $(BINARYS) *.o *.so *~ *.mo core a.out gmon.out
 
 #
 # $Log$
@@ -115,4 +118,4 @@ clean:
 #     initial states etc.
 #
 #
-# 
+#

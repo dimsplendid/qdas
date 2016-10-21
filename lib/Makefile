@@ -14,7 +14,7 @@ INCLUDEDIR = -I/usr/local/include
 #INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include
 #INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I/sw/include -I/home/ntucc/platin/opt/include
 
-OBJECTS = aux.o spectrum.o bath_js03.o bath_htgau.o bath_mt99ohm.o bath_js03art.o bath_ohmart.o bath.o bathtype_mt99art.o params.o dmop.o parser.o qng2d.o gauss-hermite.o bath_mboart.o bath_mt99art.o spectrum2d.o linpolar.o samplelist.o bath_odbo.o
+OBJECTS = aux.o spectrum.o bath_js03.o bath_htgau.o bath_mt99ohm.o bath_js03art.o bath_ohmart.o bath.o bathtype_mt99art.o params.o dmop.o parser.o qng2d.o gauss-hermite.o bath_mboart.o bath_mt99art.o spectrum2d.o linpolar.o samplelist.o bath_odbo.o bath_mdfit.o
 
 all: $(OBJECTS) libqdas
 
@@ -25,16 +25,16 @@ libqdas: $(OBJECTS)
 	rm -f libqdas.a
 	ar -crusv libqdas.a $(OBJECTS)
 
-test_js03art: bath_js03art.c bath_js03art.h bathtype_mt99art.o 
+test_js03art: bath_js03art.c bath_js03art.h bathtype_mt99art.o
 	$(CC) -static $(CFLAGS) $(INCLUDEDIR) -DMAIN -o bath_js03art bath_js03art.c $(LIBDIR) $(EXTRALIBS)
 
-test_ohmart: bath_ohmart.c bath_ohmart.h bathtype_mt99art.o 
+test_ohmart: bath_ohmart.c bath_ohmart.h bathtype_mt99art.o
 	$(CC) $(CFLAGS) $(INCLUDEDIR) -DMAIN -o bath_ohmart bath_ohmart.c $(LIBDIR) $(EXTRALIBS)
 
-test_mboart: bath_mboart.c bath_mboart.h bathtype_mt99art.o 
+test_mboart: bath_mboart.c bath_mboart.h bathtype_mt99art.o
 	$(CC) $(CFLAGS) $(INCLUDEDIR) -DMAIN -o bath_mboart bath_mboart.c $(LIBDIR) $(EXTRALIBS)
 
-test_mt99art: bath_mt99art.c bath_mt99art.h bathtype_mt99art.o 
+test_mt99art: bath_mt99art.c bath_mt99art.h bathtype_mt99art.o
 	$(CC) $(CFLAGS) $(INCLUDEDIR) -DMAIN -o bath_mt99art bath_mt99art.c $(LIBDIR) $(EXTRALIBS)
 
 test_qng2d: qng2d.c qng2d.h
@@ -46,11 +46,17 @@ test_gauss-hermite: gauss-hermite.c gauss-hermite.h aux.o
 test_linpolar: linpolar.c linpolar.h aux.o
 	$(CC) $(CFLAGS) $(INCLUDEDIR) -DMAIN -o linpolar linpolar.c $(LIBDIR) -lgsl -lgslcblas -lm aux.o
 
+test_mdfit: mdfit_par.h bath_mdfit.h bath_mdfit.c bath_odbo.o aux.o
+	$(CC) $(CFLAGS) $(INCLUDEDIR) -DMAIN -o mdfit.run bath_mdfit.c $(LIBDIR) -lgsl -lgslcblas -lm bath_odbo.o aux.o
+
 clean:
 	rm -f *.a *.o *.so *~ *.mo core a.out gmon.out bath_js03art bath_ohmart bath_mboart bath_mt99art qng2d linpolar
 
 #
 # $Log$
+# revision 1.20  2016/10/19 21:58:59  dimsplendid
+#   - add some option for new bath(mdfit, obdo).
+#
 # Revision 1.19  2007/07/27 22:50:57  platin
 #   - minor correction; test two model spectral density in bath_mt99art.c.
 #

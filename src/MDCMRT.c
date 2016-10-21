@@ -1,7 +1,7 @@
 /******************************************************
- * [FILE]     CMRT.c
+ * [FILE]     MDCMRT.c
  * [AUTHOR]   Tseng Wei-Hsiang
- * [DATE]     20151015
+ * [DATE]     20161019
  * Use the CMRT to calculate the exciton transfer rate
  ******************************************************/
 #include <stdio.h>
@@ -22,13 +22,12 @@
 #include <gsl/gsl_sf_trig.h>
 // #include <gsl/gsl_sf_bessel.h>
 
-#include "CMRT.h"
+#include "MDCMRT.h"
 /* Global constants */
 
 /* Global variables */
 const char *program_name;
-extern double BathODBOLambda;
-extern double BathODBOGAMMA;
+
 /* Global constant */
 /* Integration constants */
 #define NWSPACE (100000000)
@@ -42,7 +41,7 @@ extern double BathODBOGAMMA;
 /* Macros */
 
 /* Aux function */
-void print_input_CMRT(qdas_keys * Keys)
+void print_input_MDCMRT(qdas_keys * Keys)
 {
 	/* the simple form from params.c */
 	// int i,j;
@@ -59,9 +58,9 @@ void print_input_CMRT(qdas_keys * Keys)
 	gsl_matrix_print(Keys->He);
 	printf("\n");
 	printf("------------------------------\n");
-	printf("| lambda_0\tGamma_0\tBeta|\n");
+	printf("|Beta|\n");
 	printf("------------------------------\n");
-	printf("   %.3f\t%.3f\t%.6f",BathODBOLambda,BathODBOGAMMA,Keys->beta);
+	printf("%.6f",Keys->beta);
 	printf("\n");
 }
 
@@ -69,54 +68,19 @@ void print_input_CMRT(qdas_keys * Keys)
 static void usage()
 {
 		printf( "\
-    Usage: %s [OPTIONS] KEYFILE \n\
+    Usage: %s KEYFILE \n\
     Use the parameters described in the KEYFILE to\n\
-    calculate CMRT exciton transfer rate\n\
-    \n\
-    OPTIONS:\n\
-    \n\
-    --nocache  Do not cache polarizability data.\n\
-    --resume   Resume calculation if a .qcache file is found.\n",
+    calculate MD-CMRT exciton transfer rate\n\
+    \n",
 		program_name);
 }
 
-/* the following functions handle cache files */
-/* read the cache file; if not successful, return 0; *iter=0 too, if not succeful */
-// int read_ptavg_cache(char *fname, size_t *iter, gsl_vector_complex *Pt)
-// {
-// 	FILE *input_file;
-// 	input_file=fopen(fname, "r");
-// 	if(input_file == NULL) {
-// 			*iter=0;
-// 			return 0;
-// 	}
-// 	int err = fread(iter, sizeof(size_t), 1, input_file);
-// 	gsl_vector_complex_fread(input_file,Pt);
-// 	fclose(input_file);
-// 	return *iter;
-// }
-// void save_ptavg_cache(char *fname, size_t iter, gsl_vector_complex *Pt)
-// {
-// 	FILE *output_file;
-// 	output_file=fopen(fname, "w");
-// 	if(output_file == NULL) {
-// 			fprintf(stderr, "error while opening \"%s\" for writing: %s \n",
-// 							fname,strerror(errno));
-// 			exit(errno);
-// 	}
-// 	fwrite(&iter, sizeof(size_t), 1, output_file);
-// 	gsl_vector_complex_fwrite(output_file,Pt);
-// 	fclose(output_file);
-// }
-
 /* Main program */
 int main(int argc, char *argv[]){
-	int i;
 	char *key_file_name=NULL;
-	char *cache_file_name=NULL;
+	//char *cache_file_name=NULL;
 	/* variables for the options */
-	// int resume=0;
-	// int cache=1;
+
 	/* main keyword structure */
 	qdas_keys keys;
 	/* set program name for messages. */
@@ -125,65 +89,35 @@ int main(int argc, char *argv[]){
 	printf("\n");
 	printf("%s\n",program_name);
 	printf("\n");
-	printf("        CMRT for rate\n");
-	printf("        Copyright(C) 2015.\n");
+	printf("        MD-CMRT for rate\n");
+	printf("        Copyright(C) 2016.\n");
 	printf("        Tseng Wei-Hsiang <dimsplendid@gmail.com>.\n");
 	/* parse the arguments... */
-	double kernel_cut = 500; // default cut
-	for(i=1;i<argc;i++) {
-				if(argv[i][0] != '-') {
-						if(key_file_name == NULL) {
-								key_file_name=(char*)strdup(argv[i]);
-								cache_file_name=(char*)malloc((strlen(key_file_name)+8)*sizeof(char));
-								strcpy(cache_file_name,key_file_name);
-								strcpy(cache_file_name+strlen(key_file_name),".qcache");
-						}
-						else {
-								usage();
-								exit(EXIT_FAILURE);
-						}
-				}
-				else {
-						// if(!strncmp(argv[i],"--resume",8)) {
-						// 		/* resume previously interrupted calculation
-						// 		 * when a cache file is found */
-						// 		resume = 1;
-						// }
-						// else if(!strncmp(argv[i],"--nocache",9)) {
-						// 		/* do not save cache file. */
-						// 		cache = 0;
-						// }
-						if(!strncmp(argv[i],"--cut",5)){
-								i++;
-								kernel_cut = char2double(argv[i]);
-						}
-						else {
-								/* new options go here */
-								usage();
-								exit(EXIT_FAILURE);
-						}
-				}
-	}
+
 	/* check if we have a key file,
 	 * if yes, use the key file to initialize all parameters */
-	if(key_file_name != NULL) {
-			params_init(key_file_name,&keys);
+	if(key_file_name == NULL) {
+		key_file_name=(char*)strdup(argv[1]);
 	}
 	else {
-			usage();
-			exit(EXIT_FAILURE);
+		usage();
+		exit(EXIT_FAILURE);
+	}
+	if(key_file_name != NULL) {
+		params_init(key_file_name,&keys);
+	}
+	else {
+		usage();
+		exit(EXIT_FAILURE);
 	}
 	/* parameters read and initialized */
-	print_input_CMRT(&keys);
+	print_input_MDCMRT(&keys);
 
 	int nsize = keys.nsize;
 	gsl_matrix * rate = gsl_matrix_alloc(nsize,nsize);
 	gsl_matrix * He = gsl_matrix_alloc(nsize,nsize);
 	gsl_matrix_memcpy(He, keys.He);
 	double beta = keys.beta;
-	double lambda0 = BathODBOLambda;
-	double Gamma0 = BathODBOGAMMA;
-	double cotx = cos(beta*Gamma0/2)/sin(beta*Gamma0/2);
 	/* eigenvector eigen value */
 	gsl_vector *eval = gsl_vector_alloc (nsize);
 	gsl_matrix *evec = gsl_matrix_alloc (nsize, nsize);
@@ -206,30 +140,15 @@ int main(int argc, char *argv[]){
 	printf("eigenvector: \n");
 	gsl_matrix_print(evec);
 	printf("------------------------------------\n");
-	double p[] = {beta,lambda0,Gamma0,cotx}; //define parameters
-	/* test */
-	/*
-	printf("test transCoeff function\n");
-	int a,b;
-	a = 0;
-	b = 1;
-	// printf("test PI/beta: %.18f\n",PI/beta);
-	printf("test a = %d, b = %d.\n",a,b);
-	double p[] = {beta,lambda0,Gamma0,cotx};
-	printf("Evec(2,1): %.8f \n",gsl_matrix_get(evec,2,1));
+	double tan_C = 2.65459449960518*beta; // beta*h_bar/2 unit: ps
+	double lambda0 = lambda0_f(tan_C)*8000; // change unit to cm-1, need check
 
-	printf("plot kernel function: (from 0 to %.1f)\n",kernel_cut-1.0);
-	plot_kernel(evec,eval,p,kernel_cut,a,b);
-	*/
-
-	printf("C'(t): \n");
-	plot_C_r(p);
-	printf("C''(t): \n");
-	plot_C_i(p);
+	double p[] = {beta,lambda0,tan_C}; //define parameters
+	printf("reorginization energy: %.18f\n",lambda0);
 
 	printf("rate matrix: \n");
 	gsl_matrix * rate_matrix = gsl_matrix_alloc(nsize,nsize);
-	cal_rate_matrix(evec,eval,p, kernel_cut,rate_matrix);
+	cal_rate_matrix(evec,eval,p,rate_matrix);
 	gsl_matrix_free (rate_matrix);
 
 	gsl_vector_free (eval);
@@ -240,76 +159,7 @@ int main(int argc, char *argv[]){
 }
 
 // aux function
-double char2double(const char *cline)
-{
-
-// converts character table to the double
-
-
-	double value,decimal,divided;
-	int number, negflag;
-
-	char c;
-
-	c = *cline;
-	value = 0;
-
-	negflag = 0;
-	if (c=='-') {
-		negflag = 1;
-		cline++;
-		c = *cline;
-		}
-
-        while ((c != 0) && (c != '.')) {
-
-
-	   number = c - '0';			// i:s number
-           value += number;
-
-	   cline++;
-	   c = *cline;
-
-	   if ((c != 0) && (c != '.'))	{
-		value *= 10;	// more values to come
-		}
- 	}
-
-// decimals:
-
-
-	if (c != '.') { 			// no decimals
-		if (negflag != 0) value = 0 - value;		//negativity
-		return value;
-		}
-
-	cline++;		// jump the decimalpoint
-
-
-	divided = 10;
-	c = *cline;
-	while (c != 0) {
-	   number = c - '0';
-
-  	   if (number != 0) {
-	   decimal = number;
-	   decimal /= divided;
-	   value += decimal;
-	}
-
-	   divided *= 10;
-	   cline++;
-	   c = *cline;
-	}
-
-
-	if (negflag != 0) value = 0 - value;		// negativity
-        return value;
-
-}
-
-// aux function
-void plot_kernel(gsl_matrix * evec,gsl_vector * eval,double params[], double cut,int a,int b){
+void plot_kernel(gsl_matrix * evec,gsl_vector * eval,double params[],int a,int b){
   int i = 0;
   double p[14];
   double t;
@@ -339,13 +189,13 @@ void plot_kernel(gsl_matrix * evec,gsl_vector * eval,double params[], double cut
   printf("plot ...\n");
   for(i = 0;i < 1000; i+=1){
     t = ((double)i) / 10000.0;
-    printf("%.18f %.18f\n", t*CM2FS,kernel_F(t,p));
+    printf("%.18f %.18f\n", t*CM2FS,mdfit_kernel_F(t,p));
     // printf("%.18f %.18f\n", t,kernel_F(t,p));
   }
 
   printf("\n");
 }
-void cal_rate_matrix(gsl_matrix * evec,gsl_vector * eval,double params[], double cut,gsl_matrix * result){
+void cal_rate_matrix(gsl_matrix * evec,gsl_vector * eval,double params[] ,gsl_matrix * result){
   double p[14];
   int size = evec->size1;
   int a,b;
@@ -355,9 +205,8 @@ void cal_rate_matrix(gsl_matrix * evec,gsl_vector * eval,double params[], double
   for(a = 0;a < size; a++ ){
     for(b = 0; b < size; b++){
       p[0] = params[0];
-      p[1] = params[1];
-      p[2] = params[2];
-      p[3] = params[3];
+			p[1] = params[1];
+			p[2] = params[2];
       p[4] = gsl_vector_get(eval,a);
       p[5] = gsl_vector_get(eval,b);
       p[6] = transCoeff(evec,b,a,a,b);
@@ -369,7 +218,7 @@ void cal_rate_matrix(gsl_matrix * evec,gsl_vector * eval,double params[], double
       p[12] = transCoeff(evec,a,a,a,a);
       p[13] = transCoeff(evec,b,b,b,b);
 
-      F.function = &kernel_F;
+      F.function = &mdfit_kernel_F;
       F.params = p;
 
       gsl_integration_workspace *w = gsl_integration_workspace_alloc(NWSPACE);
@@ -381,20 +230,4 @@ void cal_rate_matrix(gsl_matrix * evec,gsl_vector * eval,double params[], double
 
   gsl_matrix_print(result);
   printf("\n");
-}
-void plot_C_r(void * params){
-	int i = 0;
-	double t;
-	for(i = 0; i < 1000; i++){
-		t = ((double)i)/10000.0;
-		printf("%.18f\t%.18f\n",t*CM2FS,ggg_r(t,params));
-	}
-}
-void plot_C_i(void * params){
-	int i = 0;
-	double t;
-	for(i = 0; i < 1000; i++){
-		t = ((double)i)/10000.0;
-		printf("%.18f\t%.18f\n",t*CM2FS,ggg_i(t,params));
-	}
 }

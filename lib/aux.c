@@ -41,7 +41,7 @@ inline double coth(double x)
 }
 
 /* x^n */
-int power(int x,int n) 
+int power(int x,int n)
 {
   int i;
   int ret;
@@ -54,7 +54,7 @@ int power(int x,int n)
 }
 
 /* n! */
-double factorial(int n) 
+double factorial(int n)
 {
   int i;
   double ret;
@@ -254,7 +254,7 @@ double gsl_matrix_complex_realmax(gsl_matrix_complex *m)
 
   max=GSL_REAL(gsl_matrix_complex_get(m,0,0));
   for(i=0;i<ndim;i++) {
-    for(j=0;j<ndim;j++) { 
+    for(j=0;j<ndim;j++) {
       v=GSL_REAL(gsl_matrix_complex_get(m,i,j));
       if(v>max) max=v;
     }
@@ -272,7 +272,7 @@ double gsl_matrix_complex_imagmax(gsl_matrix_complex *m)
 
   max=GSL_IMAG(gsl_matrix_complex_get(m,0,0));
   for(i=0;i<ndim;i++) {
-    for(j=0;j<ndim;j++) { 
+    for(j=0;j<ndim;j++) {
       v=GSL_IMAG(gsl_matrix_complex_get(m,i,j));
       if(v>max) max=v;
     }
@@ -291,7 +291,7 @@ double gsl_matrix_complex_absmax(gsl_matrix_complex *m)
 
   max=gsl_complex_abs(gsl_matrix_complex_get(m,0,0));
   for(i=0;i<ndim;i++) {
-    for(j=0;j<ndim;j++) { 
+    for(j=0;j<ndim;j++) {
       v=gsl_complex_abs(gsl_matrix_complex_get(m,i,j));
       if(v>max) max=v;
     }
@@ -301,7 +301,7 @@ double gsl_matrix_complex_absmax(gsl_matrix_complex *m)
 }
 
 /* copy a real matrix into a complex matrix a=b */
-int gsl_matrix_complex_copy_real(gsl_matrix_complex *a,const gsl_matrix *b) 
+int gsl_matrix_complex_copy_real(gsl_matrix_complex *a,const gsl_matrix *b)
 {
   int i,j;
   for(i=0;i<a->size1;i++) {
@@ -313,7 +313,7 @@ int gsl_matrix_complex_copy_real(gsl_matrix_complex *a,const gsl_matrix *b)
 }
 
 /* copy the real part of a complex matrix into a real matrix, a=Real(b) */
-int gsl_matrix_copy_complex_real(gsl_matrix *a,const gsl_matrix_complex *b) 
+int gsl_matrix_copy_complex_real(gsl_matrix *a,const gsl_matrix_complex *b)
 {
   int i,j;
   for(i=0;i<a->size1;i++) {
@@ -325,7 +325,7 @@ int gsl_matrix_copy_complex_real(gsl_matrix *a,const gsl_matrix_complex *b)
 }
 
 /* copy the imaginary part of a complex matrix into a real matrix, a=Imag(b) */
-int gsl_matrix_copy_complex_imag(gsl_matrix *a,const gsl_matrix_complex *b) 
+int gsl_matrix_copy_complex_imag(gsl_matrix *a,const gsl_matrix_complex *b)
 {
   int i,j;
   for(i=0;i<a->size1;i++) {
@@ -337,7 +337,7 @@ int gsl_matrix_copy_complex_imag(gsl_matrix *a,const gsl_matrix_complex *b)
 }
 
 /* copy the absolute value of a complex matrix into a real matrix, a=abs(b) */
-int gsl_matrix_copy_complex_abs(gsl_matrix *a,const gsl_matrix_complex *b) 
+int gsl_matrix_copy_complex_abs(gsl_matrix *a,const gsl_matrix_complex *b)
 {
   int i,j;
   for(i=0;i<a->size1;i++) {
@@ -371,7 +371,7 @@ gsl_matrix_complex *gsl_matrix_complex_invert(gsl_matrix_complex *invM, gsl_matr
   return invM;
 }
 
-struct index_value_pair_struct 
+struct index_value_pair_struct
 {
   size_t index;
   double value;
@@ -394,13 +394,13 @@ int index_value_pair_compfunc(const void *x, const void *y)
   return t;
 }
 
-/* use qsort to sort an array of N double numbers and return a list 
+/* use qsort to sort an array of N double numbers and return a list
    of integers that contains the indices of the elements in
    decending order.
-   
+
    Input:
          ilist: pointer to an array that will be used to return the list.
-         array: 
+         array:
          N:     number of elements in array
 
    Return:
@@ -417,7 +417,7 @@ void sort_double_array_decend(size_t *ilist, const double *array, size_t N)
     data[i].index=i;
     data[i].value=array[i];
   }
-  qsort(data, N, sizeof(index_value_pair), index_value_pair_compfunc);  
+  qsort(data, N, sizeof(index_value_pair), index_value_pair_compfunc);
   for(i=0;i<N;i++) {
     ilist[i]=data[i].index;
   }
@@ -432,8 +432,8 @@ void sort_double_array_decend(size_t *ilist, const double *array, size_t N)
    F(w) = |   exp(Iwt)*F(t)*dw
           /0
 
-   where F(t) is given from t=0 to t=delta_t*(N-1) in a complex 
-   vector on evenly distributed discrete grid points, and delta_t 
+   where F(t) is given from t=0 to t=delta_t*(N-1) in a complex
+   vector on evenly distributed discrete grid points, and delta_t
    is the time period between points.
 
    This function uses GSL's FFT routine to compute approximately
@@ -460,10 +460,10 @@ void hFourier_forward(gsl_vector_complex *Ft , double delta_t,
   for (i = 0; i < N; i++){
     FFT_REAL(data,i) = GSL_REAL(gsl_vector_complex_get(Ft,i));
     FFT_IMAG(data,i) = GSL_IMAG(gsl_vector_complex_get(Ft,i));
-  }                                                                           
+  }
 
-  gsl_fft_complex_radix2_forward (data, 1, N);                                
-                                                                                
+  gsl_fft_complex_radix2_forward (data, 1, N);
+
   /* Now convert the index to the frequence domain variable */
   for(i=N/2+1;i<N;i++) {
     /* from back of the array is j=-N/2...-1, N/2-1 points */
@@ -499,7 +499,7 @@ void hFourier_forward(gsl_vector_complex *Ft , double delta_t,
           /0
 
    Note: Fr and Fi should defined using "gsl_function" format.
-         
+
    This function uses GSL's FFT routine to compute approximately
    F(w) and return the result in a gsl_vector_complex array */
 void Ft_hFourier_forward(void (* Func)(double, double *,double *),
@@ -528,10 +528,10 @@ void Ft_hFourier_forward(void (* Func)(double, double *,double *),
     FFT_REAL(data,i) = Fr;
     FFT_IMAG(data,i) = Fi;
     t_i=t_i+FFT_DELTA_T;
-  }                                                                           
+  }
 
-  gsl_fft_complex_radix2_forward (data, 1, N);                                
-                                                                                
+  gsl_fft_complex_radix2_forward (data, 1, N);
+
   /* Now convert the index to the frequence domain variable */
   for(i=N/2+1;i<N;i++) {
     /* from back of the array is j=-N/2...-1, N/2-1 points */
@@ -704,7 +704,7 @@ void compute_eigenpop_overlap(gsl_matrix *m, const gsl_matrix *H0, const gsl_mat
 }
 
 /* this function generates a map that relates the eigen states of H0
-   to those of H1; basically finding the most overlapped pairs of the 
+   to those of H1; basically finding the most overlapped pairs of the
    eigenstates of the two Hamiltonians. the returned map is a vector
    so that the i-th eigenstate in H0 corresponds to the map[i]-th eigenstate
    in H1. */
@@ -712,7 +712,7 @@ void compute_eigen_map(size_t *map, const gsl_matrix *H0, const gsl_matrix *H1)
 {
   size_t n1,n2,dim;
   gsl_matrix *overlap=gsl_matrix_alloc(H0->size1,H0->size1);
-  
+
   size_t midx;
   double max,val;
 
@@ -737,7 +737,7 @@ void compute_eigen_map(size_t *map, const gsl_matrix *H0, const gsl_matrix *H1)
     map[n1]=midx;
     // midx is taken; set the overlap of this column to zero to avoid taking it twice
     for(n2=0;n2<dim;n2++)
-      gsl_matrix_set(overlap,n2,midx,0.0); 
+      gsl_matrix_set(overlap,n2,midx,0.0);
   }
 
   gsl_matrix_free(overlap);
@@ -798,6 +798,11 @@ void show_eigen(const gsl_matrix *H, gsl_matrix *dipole)
     gsl_matrix_free(mu);
   }
 
+}
+
+/* for complex number: dimsplendid */
+void gsl_complex_print(gsl_complex z){
+  printf(" %9.6f + %9.6f i\n", GSL_REAL(z), GSL_IMAG(z));
 }
 
 /*
