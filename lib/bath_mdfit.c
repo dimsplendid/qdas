@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <errno.h>
 #include <ctype.h>
 #include <string.h>
@@ -48,7 +49,8 @@
 
 // convert time from cm unit to fs
 #define CM2FS (5309.1)
-
+// change the unit to cm^-2, = <C(0)> = varience of energy, [cm-2]
+#define UNITTRANS 1
 double mdfit_kernel_F(double tau, void * p){
   // exp()[Re{}cos()-Im{}sin()]
   double real_part;
@@ -69,14 +71,11 @@ double mdfit_kernel_F(double tau, void * p){
   double C_bbbb = params[13];
   double G_r,G_i,H_r,H_i,C_r,C_i,cosx,sinx,Re_p,Im_p,expx;
 
-// change the unit to cm^-2, = <C(0)> = varience of energy, [cm-2]
-  double unit_trans = 25.808;
-
   gsl_complex G,H,C;
   t_ps = tau*CM2FS/1000; // transfer time from cm to ps
-  G = MULR(mdfit_G(t_ps,beta),unit_trans*1e6/CM2FS/CM2FS);// transfer [cm^-2 ps^2] to [unitless]
-  H = MULR(mdfit_H(t_ps,beta),unit_trans*1000/CM2FS);// transfer [cm^-2 ps] to [cm^-1]
-  C = MULR(mdfit_C(t_ps,beta),unit_trans);// transfer [cm^-2] to [cm^-2]
+  G = MULR(mdfit_G(t_ps,beta),UNITTRANS*1e6/CM2FS/CM2FS);// transfer [cm^-2 ps^2] to [unitless]
+  H = MULR(mdfit_H(t_ps,beta),UNITTRANS*1000/CM2FS);// transfer [cm^-2 ps] to [cm^-1]
+  C = MULR(mdfit_C(t_ps,beta),UNITTRANS);// transfer [cm^-2] to [cm^-2]
 
   G_r = GSL_REAL(G);
   G_i = GSL_IMAG(G);
@@ -98,14 +97,13 @@ double mdfit_kernel_F(double tau, void * p){
   return real_part;
 }
 gsl_complex mdfit_G(double t,double tan_C){
-  int i;
   gsl_complex A,B,G,Gr,Gi,tmp,tanx;
   GSL_SET_COMPLEX(&G,0.0,0.0);
   GSL_SET_COMPLEX(&Gr,0.0,0.0);
   GSL_SET_COMPLEX(&Gi,0.0,0.0);
-  for(i = 0; i < 312; i++){
-    GSL_SET_COMPLEX(&A,A_Coeff[i],B_coeff[i]);
-    GSL_SET_COMPLEX(&B,Lambda[i],Lambda_i[i]);
+  for(uint32_t i = 0; i < FIT_SIZE; i++){
+    GSL_SET_COMPLEX(&A,A_r[i],A_i[i]);
+    GSL_SET_COMPLEX(&B,B_r[i],B_i[i]);
     tmp=MUL(A,MUL(MUL(INV(B),INV(B)),SUBR(SUB(EXP(MULR(B,t)),MULR(B,t)),1)));
     tanx=TAN(MULR(B,tan_C));
     Gr=ADD(Gr,tmp);
@@ -115,14 +113,13 @@ gsl_complex mdfit_G(double t,double tan_C){
   return G;
 }
 gsl_complex mdfit_H(double t, double tan_C){
-  int i;
   gsl_complex A,B,Hr,Hi,H,tmp,tanx;
   GSL_SET_COMPLEX(&H,0.0,0.0);
   GSL_SET_COMPLEX(&Hi,0.0,0.0);
   GSL_SET_COMPLEX(&Hr,0.0,0.0);
-  for(i = 0; i < 312; i++){
-    GSL_SET_COMPLEX(&A,A_Coeff[i],B_coeff[i]);
-    GSL_SET_COMPLEX(&B,Lambda[i],Lambda_i[i]);
+  for(uint32_t i = 0; i < FIT_SIZE; i++){
+    GSL_SET_COMPLEX(&A,A_r[i],A_i[i]);
+    GSL_SET_COMPLEX(&B,B_r[i],B_i[i]);
     tmp=MUL(A,MUL(INV(B),SUBR(EXP(MULR(B,t)),1)));
     tanx=TAN(MULR(B,tan_C));
     Hr=ADD(Hr,tmp);
@@ -132,15 +129,14 @@ gsl_complex mdfit_H(double t, double tan_C){
   return H;
 }
 gsl_complex mdfit_C(double t, double tan_C){
-  int i;
   gsl_complex A,B,Cr,Ci,C,tmp,tanx;
   /* initialize */
   GSL_SET_COMPLEX(&C,0.0,0.0);
   GSL_SET_COMPLEX(&Cr,0.0,0.0);
   GSL_SET_COMPLEX(&Ci,0.0,0.0);
-  for(i = 0;i < 312; i++){
-    GSL_SET_COMPLEX(&A,A_Coeff[i],B_coeff[i]);
-    GSL_SET_COMPLEX(&B,Lambda[i],Lambda_i[i]);
+  for(uint32_t i = 0;i < FIT_SIZE; i++){
+    GSL_SET_COMPLEX(&A,A_r[i],A_i[i]);
+    GSL_SET_COMPLEX(&B,B_r[i],B_i[i]);
     //printf("A[%d]: ",i);
     //gsl_complex_print(A);
     //printf("B[%d]: ",i);
@@ -159,17 +155,16 @@ gsl_complex mdfit_C(double t, double tan_C){
 }
 
 double lambda0_f(double tan_C){
-  int i;
   gsl_complex A,B,Hi,tmp,tanx;
   GSL_SET_COMPLEX(&Hi,0.0,0.0);
-  for(i = 0; i < 312; i++){
-    GSL_SET_COMPLEX(&A,A_Coeff[i],B_coeff[i]);
-    GSL_SET_COMPLEX(&B,Lambda[i],Lambda_i[i]);
+  for(uint32_t i = 0; i < FIT_SIZE; i++){
+    GSL_SET_COMPLEX(&A,A_r[i],A_i[i]);
+    GSL_SET_COMPLEX(&B,B_r[i],B_i[i]);
     tmp=MULR(MUL(A,INV(B)),-1.0);
     tanx=TAN(MULR(B,tan_C));
     Hi=ADD(Hi,MUL(tmp,tanx));
   }
-  return unit_trans*1000/CM2FS*GSL_IMAG(Hi);
+  return UNITTRANS*1000/CM2FS*GSL_IMAG(Hi);
 }
 
 int bath_mdfit_init_params(const size_t nsize, const double beta,
@@ -186,23 +181,21 @@ int bath_mdfit_free_params(){
 
 #ifdef MAIN
 void plot_C_r(void * params){
-	int i = 0;
-	double t, beta;
+	double t, tan_C;
 	double * p = (double *)params;
-	beta = p[0];
-	for(i = 0; i < 10000; i++){
-		t = ((double)i)/10000.0;
-		printf("%.18f\t%.18f\n",t,GSL_REAL(mdfit_C(t,beta)));
+	tan_C = p[0];
+	for(uint32_t i = 0; i < 2000; i++){
+		t = ((double)i)/1000.0;
+		printf("%.18f\t%.18f\n",t,GSL_REAL(mdfit_C(t,tan_C)));
 	}
 }
 void plot_C_i(void * params){
-	int i = 0;
-	double t, beta;
+	double t, tan_C;
 	double * p = (double *)params;
-	beta = p[0];
-	for(i = 0; i < 10000; i++){
-		t = ((double)i)/10000.0;
-		printf("%.18f\t%.18f\n",t,GSL_IMAG(mdfit_C(t,beta)));
+	tan_C = p[0];
+	for(uint32_t i = 0; i < 2000; i++){
+		t = ((double)i)/1000.0;
+		printf("%.18f\t%.18f\n",t,GSL_IMAG(mdfit_C(t,tan_C)));
 	}
 }
 

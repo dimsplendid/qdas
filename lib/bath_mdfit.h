@@ -8,8 +8,7 @@
  *
  ***************************************************/
 
-#ifndef _BATH_FITMD_H
-#define _BATH_FITMD_H 1
+#pragma once
 
 #include "qdas.h"
 
@@ -26,7 +25,6 @@ gsl_complex mdfit_H(double tau,double beta);
 gsl_complex mdfit_C(double tau,double beta);
 double mdfit_kernel_F(double tau, void * p);
 double lambda0_f(double beta);
-#endif /* bath_mdfit.h */
 
 /*
  * $Log$
