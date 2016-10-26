@@ -50,7 +50,8 @@
 // convert time from cm unit to fs
 #define CM2FS (5309.1)
 // change the unit to cm^-2, = <C(0)> = varience of energy, [cm-2]
-#define UNITTRANS 1
+// #define UNITTRANS 20000
+#define UNITTRANS 6.660363243376534e+02
 double mdfit_kernel_F(double tau, void * p){
   // exp()[Re{}cos()-Im{}sin()]
   double real_part;
@@ -109,7 +110,7 @@ gsl_complex mdfit_G(double t,double tan_C){
     Gr=ADD(Gr,tmp);
     Gi=ADD(Gi,MUL(tmp,tanx));
   }
-  GSL_SET_COMPLEX(&G,GSL_REAL(Gr),GSL_IMAG(Gi));
+  GSL_SET_COMPLEX(&G,GSL_REAL(Gr),GSL_REAL(Gi));
   return G;
 }
 gsl_complex mdfit_H(double t, double tan_C){
@@ -125,7 +126,7 @@ gsl_complex mdfit_H(double t, double tan_C){
     Hr=ADD(Hr,tmp);
     Hi=ADD(Hi,MUL(tmp,tanx));
   }
-  GSL_SET_COMPLEX(&H,GSL_REAL(Hr),GSL_IMAG(Hi));
+  GSL_SET_COMPLEX(&H,GSL_REAL(Hr),GSL_REAL(Hi));
   return H;
 }
 gsl_complex mdfit_C(double t, double tan_C){
@@ -142,15 +143,19 @@ gsl_complex mdfit_C(double t, double tan_C){
     //printf("B[%d]: ",i);
     //gsl_complex_print(B);
     tmp=MUL(A,EXP(MULR(B,t)));
-    //printf("tmp: ");
-    //gsl_complex_print(tmp);
+    // printf("Cr part: ");
+    // gsl_complex_print(tmp);
+    /* What's wrong with imagenary part???? */
+
     tanx=TAN(MULR(B,tan_C));
-    //printf("tanx: ");
-    //gsl_complex_print(tanx);
+    // printf("tanx: ");
+    // gsl_complex_print(tanx);
     Cr=ADD(Cr,tmp);
     Ci=ADD(Ci,MUL(tmp,tanx));
+    // printf("Ci part:");
+    // gsl_complex_print(MUL(tmp,tanx));
   }
-  GSL_SET_COMPLEX(&C,GSL_REAL(Cr),GSL_IMAG(Ci));
+  GSL_SET_COMPLEX(&C,GSL_REAL(Cr),GSL_REAL(Ci));
   return C;
 }
 
@@ -164,7 +169,7 @@ double lambda0_f(double tan_C){
     tanx=TAN(MULR(B,tan_C));
     Hi=ADD(Hi,MUL(tmp,tanx));
   }
-  return UNITTRANS*1000/CM2FS*GSL_IMAG(Hi);
+  return UNITTRANS*1000/CM2FS*GSL_REAL(Hi);
 }
 
 int bath_mdfit_init_params(const size_t nsize, const double beta,
@@ -200,9 +205,8 @@ void plot_C_i(void * params){
 }
 
 int main(void){
-  double beta = 0.00478683;// unit: cm
+  double beta = 0.00478683;// unit: cm // 300K
   double tan_C = 2.65459449960518*beta; // beta*h_bar/2 unit: ps
-  // tan_C = 5;
   double * p = &tan_C;
 
   printf("test mdfit bath:\n");
