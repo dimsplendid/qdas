@@ -169,7 +169,7 @@ double lambda0_f(double tan_C){
     tanx=TAN(MULR(B,tan_C));
     Hi=ADD(Hi,MUL(tmp,tanx));
   }
-  return UNITTRANS*1000/CM2FS*GSL_REAL(Hi);
+  return fabs(UNITTRANS*1000/CM2FS*GSL_REAL(Hi));
 }
 
 int bath_mdfit_init_params(const size_t nsize, const double beta,
@@ -191,7 +191,7 @@ void plot_C_r(void * params){
 	tan_C = p[0];
 	for(uint32_t i = 0; i < 2000; i++){
 		t = ((double)i)/1000.0;
-		printf("%.18f\t%.18f\n",t,GSL_REAL(mdfit_C(t,tan_C)));
+		printf("%.18f\t%.18f\n",t,GSL_REAL(mdfit_G(t,tan_C)));
 	}
 }
 void plot_C_i(void * params){
@@ -200,7 +200,7 @@ void plot_C_i(void * params){
 	tan_C = p[0];
 	for(uint32_t i = 0; i < 2000; i++){
 		t = ((double)i)/1000.0;
-		printf("%.18f\t%.18f\n",t,GSL_IMAG(mdfit_C(t,tan_C)));
+		printf("%.18f\t%.18f\n",t,GSL_IMAG(mdfit_G(t,tan_C)));
 	}
 }
 
@@ -210,9 +210,9 @@ int main(void){
   double * p = &tan_C;
 
   printf("test mdfit bath:\n");
-  printf("Cr: t(ps)\tCr(t)\n");
+  printf("Gr: t(ps)\tGr(t)\n");
   plot_C_r(p);
-  printf("Ci: t(ps)\tCi(t)\n");
+  printf("Gi: t(ps)\tGi(t)\n");
   plot_C_i(p);
   return 0;
 }
