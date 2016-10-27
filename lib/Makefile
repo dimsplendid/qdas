@@ -49,8 +49,11 @@ test_linpolar: linpolar.c linpolar.h aux.o
 test_mdfit: mdfit_par.h bath_mdfit.h bath_mdfit.c bath_odbo.o aux.o
 	$(CC) $(CFLAGS) $(INCLUDEDIR) -DMAIN -o mdfit.run bath_mdfit.c $(LIBDIR) -lgsl -lgslcblas -lm bath_odbo.o aux.o
 
+test_odbo: bath_odbo.h bath_odbo.c aux.o
+	$(CC) $(CFLAGS) $(INCLUDEDIR) -DMAIN -o odbo.run bath_odbo.c $(LIBDIR) -lgsl -lgslcblas -lm aux.o
+
 clean:
-	rm -f *.a *.o *.so *~ *.mo core a.out gmon.out bath_js03art bath_ohmart bath_mboart bath_mt99art qng2d linpolar
+	rm -f *.a *.o *.so *~ *.mo *.run core a.out gmon.out bath_js03art bath_ohmart bath_mboart bath_mt99art qng2d linpolar
 
 #
 # $Log$

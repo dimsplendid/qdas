@@ -8,9 +8,7 @@
  *
  ***************************************************/
 
-#ifndef _BATH_ODBO_H
-#define _BATH_ODBO_H 1
-
+#pragma once
 #include "qdas.h"
 
 /* Shared global variables */
@@ -37,7 +35,6 @@ double ggg_i(double tau,void * params);
 double transCoeff(gsl_matrix * eigenvectors ,int ,int, int, int);
 double kernel_F(double tau, void * p);
 
-#endif /* bath_odbo.h */
 
 /*
  * $Log$

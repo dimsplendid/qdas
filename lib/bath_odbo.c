@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <errno.h>
 #include <ctype.h>
 #include <string.h>
@@ -96,7 +97,7 @@ double g_r(double tau,void * params){
   }
   // printf("The Mazbara term: %.18f\n",result );
   result = result*(-2.0*lambda0*Gamma0) + lambda0/Gamma0*cotx*\
-    (exp(-Gamma0*tau)+Gamma0*tau-1.0);
+    (exp(-Gamma0*tau)+Gamma0*tau-1.0); // unitless
   return result;
 }
 double g_i(double tau,void * params){
@@ -108,7 +109,7 @@ double g_i(double tau,void * params){
   lambda0 = p[1];
   Gamma0 = p[2];
 
-  result = -lambda0/Gamma0*(exp(-Gamma0*tau)+Gamma0*tau - 1.0);
+  result = -lambda0/Gamma0*(exp(-Gamma0*tau)+Gamma0*tau - 1.0); // unitless
   return result;
 }
 double gg_r(double tau,void * params){
@@ -129,7 +130,7 @@ double gg_r(double tau,void * params){
   }
   // printf("result: %.3f",result);
   result = result*(4.0*lambda0*Gamma0/beta) + lambda0*cotx*\
-    (-exp(-Gamma0*tau)+1.0);
+    (-exp(-Gamma0*tau)+1.0); // unit: cm^-1
   return result;
 }
 double gg_i(double tau,void * params){
@@ -141,7 +142,7 @@ double gg_i(double tau,void * params){
   lambda0 = p[1];
   Gamma0 = p[2];
 
-  result = lambda0*(exp(-Gamma0*tau)-1);
+  result = lambda0*(exp(-Gamma0*tau)-1); // unit: cm^-1
   return result;
 }
 double ggg_r(double tau,void * params){
@@ -161,7 +162,7 @@ double ggg_r(double tau,void * params){
       (4*i*i*PI*PI/beta/beta+Gamma0*Gamma0);
   }
   result = result*(-2.0*lambda0*Gamma0) + lambda0*Gamma0*cotx*\
-    exp(-Gamma0*tau);
+    exp(-Gamma0*tau); // unit cm^-2
   return result;
 }
 double ggg_i(double tau, void * params){
@@ -173,12 +174,13 @@ double ggg_i(double tau, void * params){
   lambda0 = p[1];
   Gamma0 = p[2];
 
-  result = -lambda0*Gamma0*exp(-Gamma0*tau);
+  result = -lambda0*Gamma0*exp(-Gamma0*tau);// unit: cm^-2
   return result;
 }
 double kernel_F(double tau, void * p){
   // exp()[Re{}cos()-Im{}sin()]
-  double imag_part,real_part;
+  // double imag_part;
+  double real_part;
   double * params = (double*)p;
   double lambda0 = params[1];
   double Ea = params[4];
@@ -216,8 +218,8 @@ double kernel_F(double tau, void * p){
   Im_p = C_baab*C_i - ((C_aaba - C_bbba)*H_r*((C_aaab-C_bbab)*H_i - 2.0*C_bbab*lambda0)\
         + ((C_aaba-C_bbba)*H_i - 2.0*C_bbba*lambda0)*(C_aaab - C_bbab)*H_r);
   real_part = expx * (Re_p * cosx - Im_p * sinx);
-  imag_part = expx * (Re_p * sinx + Im_p * cosx);
-  return real_part;
+  // imag_part = expx * (Re_p * sinx + Im_p * cosx);
+  return real_part; // unitless
 }
 
 /* interface functions */
@@ -247,7 +249,58 @@ int bath_odbo_init_params(const size_t nsize, const double beta,
 int bath_odbo_free_params(){
   return 0;
 }
+#ifdef MAIN
+void plot_C(void * params){
+	double t;
+  double tmp_Ci;
+	for(uint32_t i = 0; i < 3767; i++){
+		t = ((double)i)/10000.0;
+    tmp_Ci = ggg_i(t,params);
+    if (tmp_Ci < 0.0)
+		  printf("%.18f,%.18f%.18fi\n",t*CM2FS,ggg_r(t,params),tmp_Ci);
+    else
+      printf("%.18f,%.18f+%.18fi\n",t*CM2FS,ggg_r(t,params),tmp_Ci);
+	}
+}
+void plot_H(void * params){
+  double t, tmp_Hi;
+	for(uint32_t i = 0; i < 3767; i++){
+		t = ((double)i)/10000.0;
+    tmp_Hi = gg_i(t,params);
+    if (tmp_Hi < 0.0)
+      printf("%.18f,%.18f%.18fi\n",t*CM2FS,gg_r(t,params),tmp_Hi);
+    else
+		  printf("%.18f,%.18f+%.18fi\n",t*CM2FS,gg_r(t,params),tmp_Hi);
+	}
+}
+void plot_G(void * params){
+  double t,tmp_Gi;
+	for(uint32_t i = 0; i < 3767; i++){
+		t = ((double)i)/10000.0;
+    tmp_Gi = g_i(t,params);
+    if (tmp_Gi < 0.0)
+      printf("%.18f\t%.18f%.18fi\n",t*CM2FS,g_r(t,params),tmp_Gi);
+    else
+		  printf("%.18f\t%.18f+%.18fi\n",t*CM2FS,g_r(t,params),tmp_Gi);
+	}
+}
 
+int main(void){
+  double beta = 0.00478683;// unit: cm // 300K
+  double lambda0 = 70.0; // reorginization energy cm^-1
+  double Gamma0 = 40.0; // cm^-1 lineshape brodening?
+  double cotx = cos(beta*Gamma0/2)/sin(beta*Gamma0/2);
+  double p[] = {beta,lambda0,Gamma0,cotx};
+  printf("Print the lineshape function for check");
+  printf("C: t(fs)\tC(cm^-2)\n");
+  plot_C(p);
+  printf("H: t(fs)\tH(cm^-2)\n");
+  plot_H(p);
+  printf("G: t(fs)\tG(cm^-2)\n");
+  plot_G(p);
+  return 0;
+}
+#endif
 /*
  * $Log$
  * Revision 1.2  2007/01/30 08:33:15  platin
