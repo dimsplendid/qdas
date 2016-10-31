@@ -50,8 +50,8 @@
 // convert time from cm unit to fs
 #define CM2FS (5309.1)
 // change the unit to cm^-2, = <C(0)> = varience of energy, [cm-2]
-// #define UNITTRANS 20000
-#define UNITTRANS 6.660363243376534e+02
+double UNITTRANS;
+// #define UNITTRANS 6.660363243376534e+02
 double mdfit_kernel_F(double tau, void * p){
   // exp()[Re{}cos()-Im{}sin()]
   double real_part;
@@ -169,13 +169,21 @@ double lambda0_f(double tan_C){
     tanx=TAN(MULR(B,tan_C));
     Hi=ADD(Hi,MUL(tmp,tanx));
   }
-  return fabs(UNITTRANS*1000/CM2FS*GSL_REAL(Hi));
+  return fabs(UNITTRANS*1000/CM2FS*GSL_REAL(Hi));// unit: cm-1
 }
 
 int bath_mdfit_init_params(const size_t nsize, const double beta,
 			   const size_t bath_nparams, const double *bath_params){
   printf("Use MD fitting bath:\n");
   printf("\n");
+  uint32_t idx = 0;
+  printf("For each site:\n");
+  printf("%12s \n","C(0) cm^-2");
+  UNITTRANS = bath_params[idx];
+  printf("%12.4f \n",UNITTRANS);
+  printf("\n");
+
+  return 0;
 
   return 0;
 }
@@ -191,7 +199,7 @@ void plot_C_r(void * params){
 	tan_C = p[0];
 	for(uint32_t i = 0; i < 2000; i++){
 		t = ((double)i)/1000.0;
-		printf("%.18f\t%.18f\n",t,GSL_REAL(mdfit_G(t,tan_C)));
+		printf("%.18f\t%.18f\n",t,GSL_REAL(mdfit_C(t,tan_C)));
 	}
 }
 void plot_C_i(void * params){
@@ -200,7 +208,7 @@ void plot_C_i(void * params){
 	tan_C = p[0];
 	for(uint32_t i = 0; i < 2000; i++){
 		t = ((double)i)/1000.0;
-		printf("%.18f\t%.18f\n",t,GSL_IMAG(mdfit_G(t,tan_C)));
+		printf("%.18f\t%.18f\n",t,GSL_IMAG(mdfit_C(t,tan_C)));
 	}
 }
 

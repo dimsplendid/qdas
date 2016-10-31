@@ -1,6 +1,6 @@
 /***************************************************
  * params.c
- * 
+ *
  * By Yuan-Chung Cheng <yuanchung@ntu.edu.tw>
  *
  * Read key file and initialize the parameters
@@ -108,9 +108,9 @@ void print_input()
     printf("Use Monte-Carlo method for ensemble average over static disorder.\n");
     printf("NITER = %lu samples will be used in the average.\n",Keys->sdm_mc_niter);
     if(Keys->sdm_mc_rseed) {
-      printf("Will seed the random number generator with %lu.\n",Keys->sdm_mc_rseed);      
+      printf("Will seed the random number generator with %lu.\n",Keys->sdm_mc_rseed);
     } else {
-      printf("Will seed the random number generator with the system time.\n");      
+      printf("Will seed the random number generator with the system time.\n");
     }
     break;
   case QDAS_SDMETHOD_GH:
@@ -237,7 +237,7 @@ void print_input()
     if(Keys->polm_mc_rseed) {
       printf("Will seed the random number generator with %lu.\n",Keys->polm_mc_rseed);
     } else {
-      printf("Will seed the random number generator with the system time.\n");      
+      printf("Will seed the random number generator with the system time.\n");
     }
   } else {
     printf("No polarization angle is defined; the laser polarization will be ignored.\n");
@@ -353,7 +353,7 @@ int f_nsize_()
   return 0;
 }
 
-/* aux function used to read in a matrix in MATRIX or ASSIGN 
+/* aux function used to read in a matrix in MATRIX or ASSIGN
    format; this is used to read in Hamiltonian and static disorders */
 void read_matrix(gsl_matrix *m, char *description)
 {
@@ -366,12 +366,12 @@ void read_matrix(gsl_matrix *m, char *description)
     printf("Error: NSIZE must be assigned before %s.\n",description);
     exit(EXIT_FAILURE);
   }
-  
+
   if(!(str=parser_next_token())) {
     fprintf(stderr,"Error while reading %s!\n",description);
     exit(EXIT_FAILURE);
   }
-  
+
   if(! strncasecmp(str,"MAT",3)) {
     /* matrix type input, read in all n*n elements */
     for(i=0;i<n;i++) {
@@ -388,9 +388,9 @@ void read_matrix(gsl_matrix *m, char *description)
   } else if (! strncasecmp(str,"ASSI",4)) {
     /* assign type input, read in pair assigned elements:
        site1 site2 matrix_elements */
-    
+
     gsl_matrix_set_zero(m);
-    
+
     while(1) {
       str=parser_next_token();
       if(! strncasecmp(str,"END",3)) {
@@ -407,7 +407,7 @@ void read_matrix(gsl_matrix *m, char *description)
 		  description,n1,n2,n);
 	  exit(EXIT_FAILURE);
 	}
-	/* Note: index in keyword file starts from 1, 
+	/* Note: index in keyword file starts from 1,
 	   and the matrix has to be symmetric */
 	gsl_matrix_set(m,n1-1,n2-1,tmp);
 	gsl_matrix_set(m,n2-1,n1-1,tmp);
@@ -425,7 +425,7 @@ int f_hamiltonian_()
   if(Keys->nsize < 1) {
     printf("Error: NSIZE must be assigned before HAMILTONIAN.\n");
     exit(EXIT_FAILURE);
-  }  
+  }
   Keys->He = gsl_matrix_alloc(Keys->nsize,Keys->nsize);
   read_matrix(Keys->He,"HAMILTONIAN");
   return 0;
@@ -522,7 +522,7 @@ int f_nlbath_()
     printf("Error: NSIZE must be assigned before BATH.\n");
     exit(EXIT_FAILURE);
   }
-  
+
   /* bath's name following the "nlbath" keyword */
   str=parser_next_token();
   //  Keys->bath_mod = bath_lookup_id(str);
@@ -535,7 +535,7 @@ int f_nlbath_()
   Keys->nlbath[Keys->nlbath_nterms].gamma=parser_next_double();
   Keys->nlbath[Keys->nlbath_nterms].wc=parser_next_double();
 
-  /* we then read everything up to "END" into the S 
+  /* we then read everything up to "END" into the S
      matrix using either MAT or ASSI method */
   Keys->nlbath[Keys->nlbath_nterms].S=gsl_matrix_alloc(Keys->nsize,Keys->nsize);
   read_matrix(Keys->nlbath[Keys->nlbath_nterms].S,"NLBATH");
@@ -622,7 +622,7 @@ int f_dipole_()
       Keys->mu[nterms].m = ((n < m) ? m : n) - 1;
       if(Keys->mu[nterms].n < 0 || Keys->mu[nterms].m > Keys->nsize) {
 	printf("Error: assigningd state number in DIPOLE out of range.\n");
-	exit(EXIT_FAILURE);	
+	exit(EXIT_FAILURE);
       }
       fscale=parser_next_double();
       for(j=0;j<3;j++) {
@@ -712,7 +712,7 @@ int f_poptrans_()
 
   str=parser_next_token();
 
-  /* extra population transfer terms; these terms are 
+  /* extra population transfer terms; these terms are
      handled using Lindblad theorem. Format is
      src dest 1/rate */
   nterms=0;
@@ -757,7 +757,7 @@ int f_sitepoptrans_()
 
   str=parser_next_token();
 
-  /* extra site-representation population transfer terms; these terms are 
+  /* extra site-representation population transfer terms; these terms are
      handled using Lindblad theorem. Format is
      src dest 1/rate */
   nterms=0;
@@ -805,7 +805,7 @@ int f_nlpoptrans_()
 
   str=parser_next_token();
 
-  /* extra nonlinear population transfer terms; these terms are 
+  /* extra nonlinear population transfer terms; these terms are
      handled using Lindblad theorem. Format is
      src dest 1/rate (in fs) */
   nterms=0;
@@ -852,7 +852,7 @@ int f_teslist_()
   nterms=0;
   str=parser_next_token();
   while(strncasecmp(str,"END",3)) {
-    // format of the list is 
+    // format of the list is
     // lable n m
     // read: state lable in the Hamiltonian is a two-exciton state of state n and m.
     int n,m;
@@ -898,7 +898,7 @@ int f_teslist_()
     str=parser_next_token();
   } // while
   /* end reading, fill the number of terms */
-  
+
   Keys->ntes=nterms;
 
   return 0;
@@ -946,7 +946,7 @@ int f_cteslist_()
     exit(EXIT_FAILURE);
   }
 
-  /* end reading, fill the number of terms */  
+  /* end reading, fill the number of terms */
   Keys->nctes_elems=nterms;
 
   return 0;
@@ -958,13 +958,13 @@ int f_sdmethod_()
 
   /* name of the static-disorder module should follow the "sdmethod" keyword */
   str=parser_next_token();
-  
+
   if(! strncasecmp(str,"MC",2)) {
     /* Monte-Carlo method, the following is a integer for the number of interations */
     Keys->sdmethod=QDAS_SDMETHOD_MC;
     Keys->sdm_mc_niter=parser_next_int();
   } else if(! strncasecmp(str,"GH",2)) {
-    /* Gauss-Hermite method, the following is a integer for the 
+    /* Gauss-Hermite method, the following is a integer for the
        number of points and a double for the minimum weight accepted */
     Keys->sdmethod=QDAS_SDMETHOD_GH;
     Keys->sdm_gh_order=parser_next_int();
@@ -989,7 +989,7 @@ int f_polmethod_()
 
   /* name of the polarization sampling module should follow the "polmethod" keyword */
   str=parser_next_token();
-  
+
   if(! strncasecmp(str,"MC",2)) {
     /* Monte-Carlo method, the following is a integer for the number of interations */
     Keys->polmethod=QDAS_POLMETHOD_MC;
@@ -1146,7 +1146,9 @@ int f_diagonaldynamics_()
   return 0;
 }
 
+
 /* Use for CMRT, over-damped BO */
+/*
 int f_lambda_0_()
 {
   Keys->lambda_0=parser_next_double();
@@ -1157,7 +1159,7 @@ int f_Gamma_0_()
   Keys->Gamma_0=parser_next_double();
   return 0;
 }
-
+*/
 /* get dipole of a 1es state */
 void get_dipole(double *res, size_t state, size_t ndipoles, dipole *mu)
 {
@@ -1251,7 +1253,7 @@ void add_two_exciton_states(qdas_keys *keys)
   }
   free(old_vibs);
 
-  /* update the dipoles; i.e. adding 1es -> 2es transitions; 
+  /* update the dipoles; i.e. adding 1es -> 2es transitions;
      this is only possible in the site basis */
   for(i=0;i<keys->ntes;i++) {
     // two extra dipole terms for each tes
@@ -1283,7 +1285,7 @@ void params_init(char *fname, qdas_keys *key)
   /* assign the global Keys */
   Keys = key;
 
-  /* initialize bath modules before we read the keyword file; 
+  /* initialize bath modules before we read the keyword file;
      the bath parameters will be read and prepared in params.c */
   bath_mod_init();
 
@@ -1325,7 +1327,7 @@ void params_init(char *fname, qdas_keys *key)
 
   Keys->npulses=0;
 
-  /* huge default value for the detection window, also 
+  /* huge default value for the detection window, also
      ignore output field polarization by default */
   Keys->detect.upper=1e6;
   Keys->detect.lower=-1e6;
@@ -1349,7 +1351,7 @@ void params_init(char *fname, qdas_keys *key)
   // about output detail level; default is 1, output limited stuff
   Keys->printlv=1;
 
-  // Use for CMRT, over-damped BO 
+  // Use for CMRT, over-damped BO
   Keys->lambda_0 = 0;
   Keys->Gamma_0 = 0;
 
@@ -1364,7 +1366,7 @@ void params_init(char *fname, qdas_keys *key)
 	    fname,strerror(errno));
     exit(errno);
   }
-  
+
   /* required keywords */
   list=parser_klist_alloc(300);
   parser_keyword_add(list,"NSIZE_",PARSER_REQUIRED,f_nsize_);
@@ -1439,7 +1441,7 @@ void params_init(char *fname, qdas_keys *key)
 
   print_input(fname);
 
-}   
+}
 
 void params_close()
 {

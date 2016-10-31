@@ -6,6 +6,7 @@
  ******************************************************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 // #include <errno.h>
 #include <ctype.h>
 #include <string.h>
@@ -192,40 +193,10 @@ int main(int argc, char *argv[]){
 	gsl_eigen_symmv (He, eval, evec, w);
 	gsl_eigen_symmv_free (w);
 	gsl_eigen_symmv_sort (eval, evec, GSL_EIGEN_SORT_VAL_ASC);
-	{
-	  int i;
-	  for (i = 0; i < nsize; i++)
-	    {
-	      double eval_i = gsl_vector_get (eval, i);
-	      gsl_vector_view evec_i = gsl_matrix_column (evec, i);
-	      printf ("eigenvalue = %g\n", eval_i);
-	      printf ("eigenvector = \n");
-	      gsl_vector_fprintf (stdout, &evec_i.vector, "%g");
-	    }
-	}
 	printf("eigenvector: \n");
 	gsl_matrix_print(evec);
 	printf("------------------------------------\n");
 	double p[] = {beta,lambda0,Gamma0,cotx}; //define parameters
-	/* test */
-	/*
-	printf("test transCoeff function\n");
-	int a,b;
-	a = 0;
-	b = 1;
-	// printf("test PI/beta: %.18f\n",PI/beta);
-	printf("test a = %d, b = %d.\n",a,b);
-	double p[] = {beta,lambda0,Gamma0,cotx};
-	printf("Evec(2,1): %.8f \n",gsl_matrix_get(evec,2,1));
-
-	printf("plot kernel function: (from 0 to %.1f)\n",kernel_cut-1.0);
-	plot_kernel(evec,eval,p,kernel_cut,a,b);
-	*/
-
-	printf("C'(t): \n");
-	plot_C_r(p);
-	printf("C''(t): \n");
-	plot_C_i(p);
 
 	printf("rate matrix: \n");
 	gsl_matrix * rate_matrix = gsl_matrix_alloc(nsize,nsize);
@@ -348,12 +319,11 @@ void plot_kernel(gsl_matrix * evec,gsl_vector * eval,double params[], double cut
 void cal_rate_matrix(gsl_matrix * evec,gsl_vector * eval,double params[], double cut,gsl_matrix * result){
   double p[14];
   int size = evec->size1;
-  int a,b;
   gsl_function F;
   double ra=0.0,rb=0.2;
   double element, abserr;
-  for(a = 0;a < size; a++ ){
-    for(b = 0; b < size; b++){
+  for(uint_fast32_t a = 0;a < size; a++ ){
+    for(uint_fast32_t b = 0; b < size; b++){
       p[0] = params[0];
       p[1] = params[1];
       p[2] = params[2];
@@ -374,27 +344,14 @@ void cal_rate_matrix(gsl_matrix * evec,gsl_vector * eval,double params[], double
 
       gsl_integration_workspace *w = gsl_integration_workspace_alloc(NWSPACE);
 
-      gsl_integration_qags(&F,ra,rb,EPSABS/100.0, EPSREL/100.0, NWSPACE, w, &element, & abserr);
+      gsl_integration_qags(&F,ra,rb,EPSABS/100.0, EPSREL/100.0, NWSPACE, w, &element, & abserr); // int from ra to rb
+			// gsl_integration_qagiu (&F,ra, EPSABS, EPSREL, NWSPACE, w, &element, &abserr); // int from ra to inf
       gsl_matrix_set(result,a,b,2.0*element/CM2FS);
+			// check
+			// printf("H(%lu,%lu) = %.6f\n",a,b,element);
     }
   }
 
   gsl_matrix_print(result);
   printf("\n");
-}
-void plot_C_r(void * params){
-	int i = 0;
-	double t;
-	for(i = 0; i < 1000; i++){
-		t = ((double)i)/10000.0;
-		printf("%.18f\t%.18f\n",t*CM2FS,ggg_r(t,params));
-	}
-}
-void plot_C_i(void * params){
-	int i = 0;
-	double t;
-	for(i = 0; i < 1000; i++){
-		t = ((double)i)/10000.0;
-		printf("%.18f\t%.18f\n",t*CM2FS,ggg_i(t,params));
-	}
 }

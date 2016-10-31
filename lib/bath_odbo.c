@@ -213,11 +213,14 @@ double kernel_F(double tau, void * p){
   expx = exp((2.0*C_bbaa - C_aaaa - C_bbbb)*G_r);
   cosx = cos((2.0*C_bbaa - C_aaaa - C_bbbb)*G_i + (2.0*(C_bbaa - C_bbbb)*lambda0+Eb-Ea)*tau);
   sinx = sin((2.0*C_bbaa - C_aaaa - C_bbbb)*G_i + (2.0*(C_bbaa - C_bbbb)*lambda0+Eb-Ea)*tau);
+  
   Re_p = C_baab*C_r - ((C_aaba - C_bbba)*H_r*(C_aaab - C_bbab)*H_r \
         -(((C_aaba-C_bbba)*H_i - 2.0*C_bbba*lambda0)*((C_aaab-C_bbab)*H_i - 2.0*C_bbab*lambda0)));
   Im_p = C_baab*C_i - ((C_aaba - C_bbba)*H_r*((C_aaab-C_bbab)*H_i - 2.0*C_bbab*lambda0)\
         + ((C_aaba-C_bbba)*H_i - 2.0*C_bbba*lambda0)*(C_aaab - C_bbab)*H_r);
   real_part = expx * (Re_p * cosx - Im_p * sinx);
+
+
   // imag_part = expx * (Re_p * sinx + Im_p * cosx);
   return real_part; // unitless
 }
@@ -237,10 +240,10 @@ int bath_odbo_init_params(const size_t nsize, const double beta,
   printf("J_nm = 2*lambda0/pi*w*Gamma0/(w^2+Gamma0^2)\n");
   printf("\n");
   printf("For each site:\n");
-  printf("%12s %12s\n","lambda (cm^-1)","tau (fs)");
+  printf("%12s %12s\n","lambda (cm^-1)","tau (cm^-1)");
   BathODBOLambda = bath_params[idx];
   BathODBOGAMMA = bath_params[idx+1];
-  printf("%12.4f %12.4f\n",BathODBOLambda,BathODBOGAMMA*CM2FS);
+  printf("%12.4f %12.4f\n",BathODBOLambda,BathODBOGAMMA);
   printf("\n");
 
   return 0;

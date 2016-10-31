@@ -6,6 +6,7 @@
  ******************************************************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 // #include <errno.h>
 #include <ctype.h>
 #include <string.h>
@@ -24,6 +25,7 @@
 
 #include "MDCMRT.h"
 /* Global constants */
+extern double UNITTRANS;
 
 /* Global variables */
 const char *program_name;
@@ -58,9 +60,9 @@ void print_input_MDCMRT(qdas_keys * Keys)
 	gsl_matrix_print(Keys->He);
 	printf("\n");
 	printf("------------------------------\n");
-	printf("|Beta|\n");
+	printf("| C(0) | Beta |\n");
 	printf("------------------------------\n");
-	printf("%.6f",Keys->beta);
+	printf("%.6f\t%.6f",UNITTRANS,Keys->beta);
 	printf("\n");
 }
 
@@ -126,22 +128,24 @@ int main(int argc, char *argv[]){
 	gsl_eigen_symmv (He, eval, evec, w);
 	gsl_eigen_symmv_free (w);
 	gsl_eigen_symmv_sort (eval, evec, GSL_EIGEN_SORT_VAL_ASC);
-	{
-	  int i;
-	  for (i = 0; i < nsize; i++)
-	    {
+	/*
+	for (uint32_t i = 0; i < nsize; i++){
 	      double eval_i = gsl_vector_get (eval, i);
 	      gsl_vector_view evec_i = gsl_matrix_column (evec, i);
 	      printf ("eigenvalue = %g\n", eval_i);
 	      printf ("eigenvector = \n");
 	      gsl_vector_fprintf (stdout, &evec_i.vector, "%g");
-	    }
+	}
+	*/
+	printf("eigenvalue");
+	for( uint32_t i = 0; i < nsize; i++){
+		printf ("eigenvalue = %g\n", gsl_vector_get (eval, i));
 	}
 	printf("eigenvector: \n");
 	gsl_matrix_print(evec);
 	printf("------------------------------------\n");
 	double tan_C = 2.65459449960518*beta; // beta*h_bar/2 unit: ps
-	double lambda0 = lambda0_f(tan_C)*8000; // change unit to cm-1, need check
+	double lambda0 = lambda0_f(tan_C); // unit cm-1
 
 	double p[] = {beta,lambda0,tan_C}; //define parameters
 	printf("reorginization energy: %.18f\n",lambda0);
@@ -225,9 +229,9 @@ void cal_rate_matrix(gsl_matrix * evec,gsl_vector * eval,double params[] ,gsl_ma
 
       gsl_integration_qags(&F,ra,rb,EPSABS/100.0, EPSREL/100.0, NWSPACE, w, &element, & abserr);
       gsl_matrix_set(result,a,b,2.0*element/CM2FS);
+			gsl_integration_workspace_free(w);
     }
   }
-
   gsl_matrix_print(result);
   printf("\n");
 }
