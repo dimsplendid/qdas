@@ -214,13 +214,14 @@ void plot_C_i(void * params){
 
 int main(void){
   double beta = 0.00478683;// unit: cm // 300K
+  beta = 0.01865; // 77 K
   double tan_C = 2.65459449960518*beta; // beta*h_bar/2 unit: ps
   double * p = &tan_C;
 
   printf("test mdfit bath:\n");
-  printf("Gr: t(ps)\tGr(t)\n");
+  printf("Cr: t(ps)\tCr(t)\n");
   plot_C_r(p);
-  printf("Gi: t(ps)\tGi(t)\n");
+  printf("Ci: t(ps)\tCi(t)\n");
   plot_C_i(p);
   return 0;
 }

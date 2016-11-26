@@ -33,7 +33,7 @@
 #define EPSABS (1e-5)
 #define EPSREL (1e-5)
 #define PI 3.14159265359
-
+#define MAZCUT 1 // the sum of Mazbara term from 1 to n
 
 // convert time from cm unit to fs
 #define CM2FS (5309.1)
@@ -78,7 +78,6 @@ double transCoeff(gsl_matrix * evec ,int a,int b,int c,int d){
 }
 
 double g_r(double tau,void * params){
-  int i;
   double result = 0.0;
   double beta,lambda0,Gamma0,cotx;
   double *p = (double *) params;
@@ -87,10 +86,10 @@ double g_r(double tau,void * params){
   Gamma0 = p[2];
   cotx = p[3];
 
-  // Mazbara term sum 1..5
+  // Mazbara term sum 1..MAZCUT
   // printf("test exp term: %.18f \n",beta);
 
-  for(i = 1; i < 100; i++){
+  for(int i = 1; i < MAZCUT; i++){
     result += (1.0/i/PI)*\
       ((exp(-2.0*i*PI/beta)*tau-2.0*i*PI/beta*tau+1.0))/\
       (4*i*i*PI*PI/beta/beta+Gamma0*Gamma0);
@@ -113,7 +112,6 @@ double g_i(double tau,void * params){
   return result;
 }
 double gg_r(double tau,void * params){
-  int i;
   double result = 0.0;
   double beta,lambda0,Gamma0,cotx;
   double *p = (double *) params;
@@ -123,8 +121,8 @@ double gg_r(double tau,void * params){
   cotx = p[3];
   // printf("params: %.3f %.3f %.3f %.3f\n",beta,lambda0,Gamma0,cotx);
   // printf("exp term: %.18f\n",-2*i*PI/beta*tau+1);
-  // Mazbara term sum 1..5
-  for(i = 1; i < 100; i++){
+  // Mazbara term sum 1..MAZCUT
+  for(int i = 1; i < MAZCUT; i++){
     result += (exp(-2.0*i*PI/beta*tau)+1.0)/\
       (4.0*i*i*PI*PI/beta/beta+Gamma0*Gamma0);
   }
@@ -146,7 +144,6 @@ double gg_i(double tau,void * params){
   return result;
 }
 double ggg_r(double tau,void * params){
-  int i;
   double result = 0.0;
   double beta,lambda0,Gamma0,cotx;
   double *p = (double *) params;
@@ -155,8 +152,8 @@ double ggg_r(double tau,void * params){
   Gamma0 = p[2];
   cotx = p[3];
 
-  // Mazbara term sum 1..100
-  for(i = 0; i < 100; i++){
+  // Mazbara term sum 1..MAZCUT
+  for(int i = 1; i < MAZCUT; i++){
     result += (4*i*PI/beta/beta)*\
       exp(-2*i*PI/beta*tau)/\
       (4*i*i*PI*PI/beta/beta+Gamma0*Gamma0);
@@ -213,7 +210,7 @@ double kernel_F(double tau, void * p){
   expx = exp((2.0*C_bbaa - C_aaaa - C_bbbb)*G_r);
   cosx = cos((2.0*C_bbaa - C_aaaa - C_bbbb)*G_i + (2.0*(C_bbaa - C_bbbb)*lambda0+Eb-Ea)*tau);
   sinx = sin((2.0*C_bbaa - C_aaaa - C_bbbb)*G_i + (2.0*(C_bbaa - C_bbbb)*lambda0+Eb-Ea)*tau);
-  
+
   Re_p = C_baab*C_r - ((C_aaba - C_bbba)*H_r*(C_aaab - C_bbab)*H_r \
         -(((C_aaba-C_bbba)*H_i - 2.0*C_bbba*lambda0)*((C_aaab-C_bbab)*H_i - 2.0*C_bbab*lambda0)));
   Im_p = C_baab*C_i - ((C_aaba - C_bbba)*H_r*((C_aaab-C_bbab)*H_i - 2.0*C_bbab*lambda0)\
@@ -289,7 +286,8 @@ void plot_G(void * params){
 }
 
 int main(void){
-  double beta = 0.00478683;// unit: cm // 300K
+  // double beta = 0.00478683;// unit: cm // 300K
+  double beta = 0.01865; // 77 K
   double lambda0 = 70.0; // reorginization energy cm^-1
   double Gamma0 = 40.0; // cm^-1 lineshape brodening?
   double cotx = cos(beta*Gamma0/2)/sin(beta*Gamma0/2);
