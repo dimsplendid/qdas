@@ -27,6 +27,10 @@ double gg_r(double tau,void * params);
 double gg_i(double tau,void * params);
 double ggg_r(double tau,void * params);
 double ggg_i(double tau,void * params);
+
+gsl_complex C_biexp(double tau,void *p);
+gsl_complex H_biexp(double tau,void *p);
+gsl_complex G_biexp(double tau,void *p);
 /* exciton basis lineshape function                            */
 /* Because these lineshape functions and reorginization energy */
 /* do not depend on the site index, so the transfer sum can    */

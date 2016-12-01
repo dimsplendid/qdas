@@ -22,6 +22,7 @@
 #include <sys/stat.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_sf.h>
+#include <gsl/gsl_complex_math.h>
 
 #include "qdas.h"
 #include "aux.h"
@@ -37,6 +38,18 @@
 
 // convert time from cm unit to fs
 #define CM2FS (5309.1)
+
+/* Define gsl complex macro */
+#define ADD gsl_complex_add
+#define MUL gsl_complex_mul
+#define SUB gsl_complex_sub
+#define INV gsl_complex_inverse
+#define ADDR gsl_complex_add_real
+#define SUBR gsl_complex_sub_real
+#define MULR gsl_complex_mul_real
+#define DIVR gsl_complex_div_real
+#define EXP gsl_complex_exp
+#define TAN gsl_complex_tan
 
 double BathODBOLambda;
 double BathODBOGAMMA;
@@ -174,6 +187,84 @@ double ggg_i(double tau, void * params){
   result = -lambda0*Gamma0*exp(-Gamma0*tau);// unit: cm^-2
   return result;
 }
+/*
+* Use the bi-exponetial fitting for the lineshape function
+* Tian, B. L.; Ding, J. J.; Xu, R. X.; Yan, Y.
+* Biexponential Theory of Drude Dissipation via Hierarchical Quantum Master Equation.
+* J. Chem. Phys. 2010, 133 (11), 1–6.
+* C(t>0) ~ c1 exp(-r1 t) + c2 exp(-r2 t) + 2Δδ(t)
+*/
+
+gsl_complex C_biexp(double tau,void *p){
+  gsl_complex result;
+  double *params = (double *)p;
+
+  // input params
+  double beta   = params[0];
+  double lambda = params[1];
+  double r1     = params[2];
+
+  // biexp fitting params
+  double r2 = sqrt(42.0)/beta;
+  double Delta = beta*lambda*r1/20.0;
+  gsl_complex c1,c2;
+  GSL_SET_COMPLEX(&c1,(2.0*lambda/beta)*(1.0-10*(Delta/lambda)*(Delta/lambda)\
+                                      -2.45/((r2/r1)*(r2/r1)-1.0))\
+                                      ,-lambda*r1);
+  GSL_SET_COMPLEX(&c2,98*r2*Delta/(beta*beta)/(r2*r2-r1*r1),0.0);
+  // C = c1*exp(-r1*t)+c2*exp(-r2*t);
+  result = ADD(MULR(c1,exp(-r1*tau)),MULR(c2,exp(-r2*tau)));
+  return result;
+}
+
+gsl_complex H_biexp(double tau,void *p){
+  gsl_complex result;
+  double *params = (double *)p;
+
+  // input params
+  double beta   = params[0];
+  double lambda = params[1];
+  double r1     = params[2];
+
+  // biexp fitting params
+  double r2 = sqrt(42.0)/beta;
+  double Delta = beta*lambda*r1/20.0;
+  gsl_complex c1,c2;
+  GSL_SET_COMPLEX(&c1,(2.0*lambda/beta)*(1.0-10*(Delta/lambda)*(Delta/lambda)\
+                                      -2.45/((r2/r1)*(r2/r1)-1.0))\
+                                      ,-lambda*r1);
+  GSL_SET_COMPLEX(&c2,98*r2*Delta/(beta*beta)/(r2*r2-r1*r1),0.0);
+  // H = (c1-c1*exp(-r1*t))/r1+(c2-c2*exp(-r2*t))/r2+Delta;
+  result = ADDR(ADD(DIVR(SUB(c1,MULR(c1,exp(-r1*tau))),r1),\
+                    DIVR(SUB(c2,MULR(c2,exp(-r2*tau))),r2)),Delta);
+  return result;
+}
+
+gsl_complex G_biexp(double tau,void *p){
+  gsl_complex result;
+  double *params = (double *)p;
+
+  // input params
+  double beta   = params[0];
+  double lambda = params[1];
+  double r1     = params[2];
+
+  // biexp fitting params
+  double r2 = sqrt(42.0)/beta;
+  double Delta = beta*lambda*r1/20.0;
+  gsl_complex c1,c2;
+  GSL_SET_COMPLEX(&c1,(2.0*lambda/beta)*(1.0-10*(Delta/lambda)*(Delta/lambda)\
+                                      -2.45/((r2/r1)*(r2/r1)-1.0))\
+                                      ,-lambda*r1);
+  GSL_SET_COMPLEX(&c2,98*r2*Delta/(beta*beta)/(r2*r2-r1*r1),0.0);
+  // G = c1*(-1+exp(-r1*t))/r1^2+c2*(-1+exp(-r2*t))/r2^2+c1*t/r1+c2*t/r2+Delta*t;
+  result = ADDR(ADD(\
+                ADD(DIVR(MULR(c1,exp(-r1*tau)-1.0),r1*r1),MULR(c1,tau/r1)),\
+                ADD(DIVR(MULR(c2,exp(-r2*tau)-1.0),r2*r2),MULR(c2,tau/r2))),\
+                Delta*tau);
+  return result;
+}
+
 double kernel_F(double tau, void * p){
   // exp()[Re{}cos()-Im{}sin()]
   // double imag_part;
@@ -200,13 +291,26 @@ double kernel_F(double tau, void * p){
     *sin((2.0*C_bbaa-C_aaaa-C_bbbb)*g_i(tau,params)+(2.0*(C_bbaa-C_bbbb)*lambda0+(Eb-Ea))*tau)));
   */
   double G_r,G_i,H_r,H_i,C_r,C_i,cosx,sinx,Re_p,Im_p,expx;
+  gsl_complex G,H,C;
+  /*
+  * ODBO analytic need to modified
   G_r = g_r(tau,params);
   G_i = g_i(tau,params);
   H_r = gg_r(tau,params);
   H_i = gg_i(tau,params);
   C_r = ggg_r(tau,params);
   C_i = ggg_i(tau,params);
-
+  */
+  // ODBO biexp fitting
+  G = G_biexp(tau,params);
+  H = H_biexp(tau,params);
+  C = C_biexp(tau,params);
+  G_r = GSL_REAL(G);
+  G_i = GSL_IMAG(G);
+  H_r = GSL_REAL(H);
+  H_i = GSL_IMAG(H);
+  C_r = GSL_REAL(C);
+  C_i = GSL_IMAG(C);
   expx = exp((2.0*C_bbaa - C_aaaa - C_bbbb)*G_r);
   cosx = cos((2.0*C_bbaa - C_aaaa - C_bbbb)*G_i + (2.0*(C_bbaa - C_bbbb)*lambda0+Eb-Ea)*tau);
   sinx = sin((2.0*C_bbaa - C_aaaa - C_bbbb)*G_i + (2.0*(C_bbaa - C_bbbb)*lambda0+Eb-Ea)*tau);
@@ -252,36 +356,53 @@ int bath_odbo_free_params(){
 #ifdef MAIN
 void plot_C(void * params){
 	double t;
-  double tmp_Ci;
+  // double tmp_Ci;
+  gsl_complex c;
 	for(uint32_t i = 0; i < 3767; i++){
 		t = ((double)i)/10000.0;
+    /*
     tmp_Ci = ggg_i(t,params);
     if (tmp_Ci < 0.0)
 		  printf("%.18f,%.18f%.18fi\n",t*CM2FS,ggg_r(t,params),tmp_Ci);
     else
       printf("%.18f,%.18f+%.18fi\n",t*CM2FS,ggg_r(t,params),tmp_Ci);
+    */
+    c = C_biexp(t,params);
+    printf("%.18f, %.18f %+.18fi\n",t*CM2FS,GSL_REAL(c),GSL_IMAG(c));
 	}
 }
 void plot_H(void * params){
-  double t, tmp_Hi;
+  double t;
+  gsl_complex h;
+  // double tmp_Hi;
 	for(uint32_t i = 0; i < 3767; i++){
 		t = ((double)i)/10000.0;
+    /*
     tmp_Hi = gg_i(t,params);
     if (tmp_Hi < 0.0)
       printf("%.18f,%.18f%.18fi\n",t*CM2FS,gg_r(t,params),tmp_Hi);
     else
 		  printf("%.18f,%.18f+%.18fi\n",t*CM2FS,gg_r(t,params),tmp_Hi);
+    */
+    h = H_biexp(t,params);
+    printf("%.18f, %.18f %+.18fi\n",t*CM2FS,GSL_REAL(h),GSL_IMAG(h));
 	}
 }
 void plot_G(void * params){
-  double t,tmp_Gi;
+  double t;
+  gsl_complex g;
+  // double tmp_Gi;
 	for(uint32_t i = 0; i < 3767; i++){
 		t = ((double)i)/10000.0;
+    /*
     tmp_Gi = g_i(t,params);
     if (tmp_Gi < 0.0)
       printf("%.18f\t%.18f%.18fi\n",t*CM2FS,g_r(t,params),tmp_Gi);
     else
 		  printf("%.18f\t%.18f+%.18fi\n",t*CM2FS,g_r(t,params),tmp_Gi);
+    */
+    g = G_biexp(t,params);
+    printf("%.18f, %.18f %+.18fi\n",t*CM2FS,GSL_REAL(g),GSL_IMAG(g));
 	}
 }
 
@@ -290,15 +411,17 @@ int main(void){
   double beta = 0.01865; // 77 K
   double lambda0 = 70.0; // reorginization energy cm^-1
   double Gamma0 = 40.0; // cm^-1 lineshape brodening?
-  double cotx = cos(beta*Gamma0/2)/sin(beta*Gamma0/2);
+  double cotx = 1/tan(beta*Gamma0/2);
   double p[] = {beta,lambda0,Gamma0,cotx};
   printf("Print the lineshape function for check");
   printf("C: t(fs)\tC(cm^-2)\n");
   plot_C(p);
-  printf("H: t(fs)\tH(cm^-2)\n");
+
+  printf("H: t(fs)\tH(cm^-1)\n");
   plot_H(p);
-  printf("G: t(fs)\tG(cm^-2)\n");
+  printf("G: t(fs)\tG(unitless)\n");
   plot_G(p);
+
   return 0;
 }
 #endif
