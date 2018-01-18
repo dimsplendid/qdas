@@ -23,9 +23,8 @@
 #include <string.h>
 // #include <gsl/gsl_sf_bessel.h>
 
-#include "MDCMRT.h"
+#include "tmpCMRT.h"
 /* Global constants */
-extern double UNITTRANS;
 
 /* Global variables */
 const char *program_name;
@@ -42,7 +41,7 @@ const char *program_name;
 /* Macros */
 
 /* Aux function */
-void print_input_MDCMRT(qdas_keys *Keys) {
+void print_input_tmpCMRT(qdas_keys *Keys) {
     /* the simple form from params.c */
     // int i,j;
     int n;
@@ -57,18 +56,13 @@ void print_input_MDCMRT(qdas_keys *Keys) {
     printf("\n");
     gsl_matrix_print(Keys->He);
     printf("\n");
-    printf("------------------------------\n");
-    printf("| C(0) | Beta |\n");
-    printf("------------------------------\n");
-    printf("%.6f\t%.6f", UNITTRANS, Keys->beta);
-    printf("\n");
 }
 
 /* Display usage information and exit. */
 static void usage() {
     printf("\
     Usage: %s KEYFILE \n\
-    Use the parameters described in the KEYFILE to\n\
+    Use the parameters described in the KEYFILE and data in data/*.csv to\n\
     calculate MD-CMRT exciton transfer rate\n\
     \n",
            program_name);
@@ -108,13 +102,12 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     /* parameters read and initialized */
-    print_input_MDCMRT(&keys);
+    print_input_tmpCMRT(&keys);
 
     int nsize = keys.nsize;
     gsl_matrix *rate = gsl_matrix_alloc(nsize, nsize);
     gsl_matrix *He = gsl_matrix_alloc(nsize, nsize);
     gsl_matrix_memcpy(He, keys.He);
-    double beta = keys.beta;
     /* eigenvector eigen value */
     gsl_vector *eval = gsl_vector_alloc(nsize);
     gsl_matrix *evec = gsl_matrix_alloc(nsize, nsize);
@@ -123,15 +116,7 @@ int main(int argc, char *argv[]) {
     gsl_eigen_symmv(He, eval, evec, w);
     gsl_eigen_symmv_free(w);
     gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_VAL_ASC);
-    /*
-    for (uint32_t i = 0; i < nsize; i++){
-          double eval_i = gsl_vector_get (eval, i);
-          gsl_vector_view evec_i = gsl_matrix_column (evec, i);
-          printf ("eigenvalue = %g\n", eval_i);
-          printf ("eigenvector = \n");
-          gsl_vector_fprintf (stdout, &evec_i.vector, "%g");
-    }
-    */
+    
     printf("eigenvalue");
     for (uint32_t i = 0; i < nsize; i++) {
         printf("eigenvalue = %g\n", gsl_vector_get(eval, i));
@@ -139,16 +124,16 @@ int main(int argc, char *argv[]) {
     printf("eigenvector: \n");
     gsl_matrix_print(evec);
     printf("------------------------------------\n");
-    double tan_C = 2.65459449960518 * beta; // beta*h_bar/2 unit: ps
-    double lambda0 = lambda0_f(tan_C);      // unit cm-1
+    
 
-    double p[] = {beta, lambda0, tan_C}; // define parameters
-    printf("reorginization energy: %.18f\n", lambda0);
+    md_par *p = calloc(sizeof(md_par), 1); // define parameters
 
     printf("rate matrix: \n");
     gsl_matrix *rate_matrix = gsl_matrix_alloc(nsize, nsize);
     cal_rate_matrix(evec, eval, p, rate_matrix);
-    gsl_matrix_free(rate_matrix);
+    
+	free(p);
+	gsl_matrix_free(rate_matrix);
 
     gsl_vector_free(eval);
     gsl_matrix_free(evec);
@@ -158,68 +143,30 @@ int main(int argc, char *argv[]) {
 }
 
 // aux function
-void plot_kernel(gsl_matrix *evec, gsl_vector *eval, double params[], int a,
-                 int b) {
-    int i = 0;
-    double p[14];
-    double t;
-    printf("a: %d, b: %d\n", a, b);
-    double C_baab = transCoeff(evec, b, a, a, b);
-    double C_aaba = transCoeff(evec, a, a, b, a);
-    double C_bbba = transCoeff(evec, b, b, b, a);
-    double C_aaab = transCoeff(evec, a, a, a, b);
-    double C_bbab = transCoeff(evec, b, b, a, b);
-    double C_bbaa = transCoeff(evec, b, b, a, a);
-    double C_aaaa = transCoeff(evec, a, a, a, a);
-    double C_bbbb = transCoeff(evec, b, b, b, b);
-    p[0] = params[0];
-    p[1] = params[1];
-    p[2] = params[2];
-    p[3] = params[3];
-    p[4] = gsl_vector_get(eval, a);
-    p[5] = gsl_vector_get(eval, b);
-    p[6] = C_baab;
-    p[7] = C_aaba;
-    p[8] = C_bbba;
-    p[9] = C_aaab;
-    p[10] = C_bbab;
-    p[11] = C_bbaa;
-    p[12] = C_aaaa;
-    p[13] = C_bbbb;
-    printf("plot ...\n");
-    for (i = 0; i < 1000; i += 1) {
-        t = ((double)i) / 10000.0;
-        printf("%.18f %.18f\n", t * CM2FS, mdfit_kernel_F(t, p));
-        // printf("%.18f %.18f\n", t,kernel_F(t,p));
-    }
-
-    printf("\n");
-}
-void cal_rate_matrix(gsl_matrix *evec, gsl_vector *eval, double params[],
+void cal_rate_matrix(gsl_matrix *evec, gsl_vector *eval, md_par *p,
                      gsl_matrix *result) {
-    double p[14];
     int size = evec->size1;
-    int a, b;
     gsl_function F;
     double ra = 0.0, rb = 0.2;
     double element, abserr;
-    for (a = 0; a < size; a++) {
-        for (b = 0; b < size; b++) {
-            p[0] = params[0];
-            p[1] = params[1];
-            p[2] = params[2];
-            p[4] = gsl_vector_get(eval, a);
-            p[5] = gsl_vector_get(eval, b);
-            p[6] = transCoeff(evec, b, a, a, b);
-            p[7] = transCoeff(evec, a, a, b, a);
-            p[8] = transCoeff(evec, b, b, b, a);
-            p[9] = transCoeff(evec, a, a, a, b);
-            p[10] = transCoeff(evec, b, b, a, b);
-            p[11] = transCoeff(evec, b, b, a, a);
-            p[12] = transCoeff(evec, a, a, a, a);
-            p[13] = transCoeff(evec, b, b, b, b);
+	md_read("../data/g.csv", p->g);
+	md_read("../data/h.csv", p->h);
+	md_read("../data/c.csv", p->c);
+	p->lambda0 = md_lambda0_f(p->h);
+    for (uint32_t a = 0; a < size; a++) {
+        for (uint32_t b = 0; b < size; b++) {
+            p->Ea = gsl_vector_get(eval, a);
+            p->Eb = gsl_vector_get(eval, b);
+            p->C_baab = transCoeff(evec, b, a, a, b);
+            p->C_aaba = transCoeff(evec, a, a, b, a);
+            p->C_bbba = transCoeff(evec, b, b, b, a);
+            p->C_aaab = transCoeff(evec, a, a, a, b);
+            p->C_bbab = transCoeff(evec, b, b, a, b);
+            p->C_bbaa = transCoeff(evec, b, b, a, a);
+            p->C_aaaa = transCoeff(evec, a, a, a, a);
+            p->C_bbbb = transCoeff(evec, b, b, b, b);
 
-            F.function = &mdfit_kernel_F;
+            F.function = &md_kernel_F;
             F.params = p;
 
             gsl_integration_workspace *w =

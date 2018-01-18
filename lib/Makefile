@@ -1,10 +1,10 @@
-# Make file for qas
+# Make file for qdas
 # By Yuan-Chung Cheng <yccheng@berkeley.edu>
 #
 
-CC = gcc
-CFLAGS = -O3 -finline-functions -Wall -Winline -funroll-loops -fexpensive-optimizations
-#CFLAGS = -g -DBATH_DEBUG
+CC = clang
+CFLAGS = -O3 -Wall -Winline -funroll-loops
+#CFLAGS = -g3 -DBATH_DEBUG
 
 #LIBDIR = -L/home/platin/x-prog/ycclib -L/usr/local/lib -L/sw/lib
 LIBDIR = -L/usr/local/lib -L.
@@ -14,7 +14,7 @@ INCLUDEDIR = -I/usr/local/include
 #INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include
 #INCLUDEDIR = -I/usr/local/include -I/usr/X11R6/include -I/sw/include -I/home/ntucc/platin/opt/include
 
-OBJECTS = aux.o spectrum.o bath_js03.o bath_htgau.o bath_mt99ohm.o bath_js03art.o bath_ohmart.o bath.o bathtype_mt99art.o params.o dmop.o parser.o qng2d.o gauss-hermite.o bath_mboart.o bath_mt99art.o spectrum2d.o linpolar.o samplelist.o bath_odbo.o bath_mdfit.o
+OBJECTS = aux.o spectrum.o bath_js03.o bath_htgau.o bath_mt99ohm.o bath_js03art.o bath_ohmart.o bath.o bathtype_mt99art.o params.o dmop.o parser.o qng2d.o gauss-hermite.o bath_mboart.o bath_mt99art.o spectrum2d.o linpolar.o samplelist.o bath_odbo.o bath_mdfit.o bath_md.o
 
 all: $(OBJECTS) libqdas
 
@@ -51,6 +51,9 @@ test_mdfit: mdfit_par.h bath_mdfit.h bath_mdfit.c bath_odbo.o aux.o
 
 test_odbo: bath_odbo.h bath_odbo.c aux.o
 	$(CC) $(CFLAGS) $(INCLUDEDIR) -DMAIN -o odbo.run bath_odbo.c $(LIBDIR) -lgsl -lgslcblas -lm aux.o
+
+test_md: bath_md.c bath_md.h bath_odbo.o aux.o
+	$(CC) $(CFLAGS) $(INCLUDEDIR) -g3 -DMAIN -o test_md bath_md.c $(LIBDIR) -lgsl -lgslcblas -lm aux.o
 
 clean:
 	rm -f *.a *.o *.so *~ *.mo *.run core a.out gmon.out bath_js03art bath_ohmart bath_mboart bath_mt99art qng2d linpolar

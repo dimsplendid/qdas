@@ -37,6 +37,7 @@
 
 #include "bath_odbo.h"
 #include "bath_mdfit.h"
+#include "bath_md.h"
 /* Constants that define the capacity of the program */
 #define MAX_BATH_NUMBERS (16)
 #define STR_BUFFER_SIZE (256)
@@ -124,6 +125,13 @@ void bath_mod_init()
   BathModulesList[8].description = strdup("MD fitting correlation function by 王佑仁.");
   BathModulesList[8].f_init_params = bath_mdfit_init_params;
   BathModulesList[8].f_free_params = bath_mdfit_free_params;
+
+ // modified by dimsplendid, used for MD fitting correation functions
+  BathModulesList[9].id = 9;
+  BathModulesList[9].keyword = strdup("MD");
+  BathModulesList[9].description = strdup("MD fitting correlation function by 謝守庭.");
+  BathModulesList[9].f_init_params = bath_md_init_params;
+  BathModulesList[9].f_free_params = bath_md_free_params;
 
 }
 

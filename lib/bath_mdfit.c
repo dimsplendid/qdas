@@ -184,8 +184,6 @@ int bath_mdfit_init_params(const size_t nsize, const double beta,
   printf("\n");
 
   return 0;
-
-  return 0;
 }
 
 int bath_mdfit_free_params(){

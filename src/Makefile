@@ -2,8 +2,8 @@
 # By Yuan-Chung Cheng <yccheng@berkeley.edu>
 #
 
-CC = gcc
-CFLAGS = -O3 -finline-functions -Wall -Winline -funroll-loops -fexpensive-optimizations
+CC = clang
+CFLAGS = -O3 -Wall -Winline -funroll-loops 
 #CFLAGS = -g -Wall -DDEBUG -DDEBUGDEBUG
 #CFLAGS = -pg -fPIC -O2 -finline-functions -Wall -Winline -funroll-loops -fexpensive-optimizations
 
@@ -19,7 +19,7 @@ INCLUDEDIR = -I../lib
 INSTALL = /usr/bin/install -c
 BINDIR = /opt/qdas
 
-BINARYS = tnl-dynamics.run tnl-dm3pes.run tnl-lineshape.run CMRT.run MDCMRT.run
+BINARYS = tnl-dynamics.run tnl-dm3pes.run tnl-lineshape.run CMRT.run MDCMRT.run tmpCMRT.run
 OBJECTS = tnl-kern.o
 
 all: $(OBJECTS) $(BINARYS)
@@ -37,10 +37,13 @@ tnl-lineshape.run: tnl-lineshape.c $(OBJECTS)
 	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-lineshape.run tnl-lineshape.c $(OBJECTS) $(EXTRALIBS)
 
 CMRT.run:	CMRT.c CMRT.h $(OBJECTS)
-		$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o CMRT.run CMRT.c $(OBJECTS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o CMRT.run CMRT.c $(OBJECTS) $(EXTRALIBS)
 
 MDCMRT.run:	MDCMRT.c MDCMRT.h $(OBJECTS)
-				$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o MDCMRT.run MDCMRT.c $(OBJECTS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o MDCMRT.run MDCMRT.c $(OBJECTS) $(EXTRALIBS)
+
+tmpCMRT.run: tmpCMRT.c tmpCMRT.h $(OBJECTS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tmpCMRT.run tmpCMRT.c $(OBJECTS) $(EXTRALIBS)
 
 static: tnl-dynamics.c tnl-lineshape.c tnl-dynamics.h tnl-dm3pes.c tnl-dm3pes.h $(OBJECTS)
 	$(CC) -static $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dynamics_static.run tnl-dynamics.c $(OBJECTS) $(EXTRALIBS)
