@@ -41,21 +41,10 @@
 // CM2FS (fs/cm)
 #define CM2FS (5309.1)
 
-/* Define gsl complex macro */
-#define ADD gsl_complex_add
-#define MUL gsl_complex_mul
-#define SUB gsl_complex_sub
-#define INV gsl_complex_inverse
-#define ADDR gsl_complex_add_real
-#define SUBR gsl_complex_sub_real
-#define MULR gsl_complex_mul_real
-#define DIVR gsl_complex_div_real
-#define EXP gsl_complex_exp
-#define TAN gsl_complex_tan
-
 double md_kernel_F(double tau, void *p) {
     // exp()[Re{}cos()-Im{}sin()]
     // double imag_part;
+	// printf("time: %.4f cm\n", tau);
     double real_part;
     md_par *params = (md_par *)p;
     double lambda0 = params->lambda0;
@@ -102,6 +91,9 @@ double md_kernel_F(double tau, void *p) {
 
 static complex double discrete2continuous(double tau, complex double array[]) {
     tau = tau * CM2FS;    // unit: fs
+	if (tau > 4092.0) {
+		tau = 4092.0;
+	}
     double time_step = 1; // unit: fs
     uint32_t index = (uint32_t)(tau / time_step);
     double residual = (tau / time_step) - (double)index;
@@ -121,7 +113,7 @@ complex double md_H(double tau, complex double h[4096]) {
     return discrete2continuous(tau, h);
 }
 double md_lambda0_f(complex double h[4096]) {
-    return h[4092];
+    return creal(h[4092]);
 }
 void md_read(char *file_name, complex double array[4096]) {
     double real, imag;

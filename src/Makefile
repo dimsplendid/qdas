@@ -43,7 +43,7 @@ MDCMRT.run:	MDCMRT.c MDCMRT.h $(OBJECTS)
 	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o MDCMRT.run MDCMRT.c $(OBJECTS) $(EXTRALIBS)
 
 tmpCMRT.run: tmpCMRT.c tmpCMRT.h $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tmpCMRT.run tmpCMRT.c $(OBJECTS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -g3 -o tmpCMRT.run tmpCMRT.c $(OBJECTS) $(EXTRALIBS)
 
 static: tnl-dynamics.c tnl-lineshape.c tnl-dynamics.h tnl-dm3pes.c tnl-dm3pes.h $(OBJECTS)
 	$(CC) -static $(CFLAGS) $(INCLUDEDIR) $(LIBDIR) -o tnl-dynamics_static.run tnl-dynamics.c $(OBJECTS) $(EXTRALIBS)

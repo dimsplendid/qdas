@@ -31,7 +31,7 @@ const char *program_name;
 
 /* Global constant */
 /* Integration constants */
-#define NWSPACE (100000000)
+#define NWSPACE (100000)
 #define EPSABS (1e-5)
 #define EPSREL (1e-5)
 #define PI 3.14159265359
@@ -116,24 +116,31 @@ int main(int argc, char *argv[]) {
     gsl_eigen_symmv(He, eval, evec, w);
     gsl_eigen_symmv_free(w);
     gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_VAL_ASC);
-    
-    printf("eigenvalue");
+
+    printf("eigenvalues:\n");
     for (uint32_t i = 0; i < nsize; i++) {
         printf("eigenvalue = %g\n", gsl_vector_get(eval, i));
     }
     printf("eigenvector: \n");
     gsl_matrix_print(evec);
     printf("------------------------------------\n");
-    
 
     md_par *p = calloc(sizeof(md_par), 1); // define parameters
+    md_read("../data/g.csv", p->g);
+    printf("read G successfully\n");
+    md_read("../data/h.csv", p->h);
+    printf("read H successfully\n");
+    md_read("../data/c.csv", p->c);
+    printf("read C successfully\n");
+    p->lambda0 = md_lambda0_f(p->h);
+	printf("lambda0 = %f cm-1\n", p->lambda0);
 
     printf("rate matrix: \n");
     gsl_matrix *rate_matrix = gsl_matrix_alloc(nsize, nsize);
     cal_rate_matrix(evec, eval, p, rate_matrix);
-    
-	free(p);
-	gsl_matrix_free(rate_matrix);
+
+    free(p);
+    gsl_matrix_free(rate_matrix);
 
     gsl_vector_free(eval);
     gsl_matrix_free(evec);
@@ -147,37 +154,42 @@ void cal_rate_matrix(gsl_matrix *evec, gsl_vector *eval, md_par *p,
                      gsl_matrix *result) {
     int size = evec->size1;
     gsl_function F;
-    double ra = 0.0, rb = 0.2;
+    double ra = 0.001, rb = 0.4;
+	printf("integral from %f ps to %.2f ps\n", ra * CM2FS / 1000, rb * CM2FS / 1000);
     double element, abserr;
-	md_read("../data/g.csv", p->g);
-	md_read("../data/h.csv", p->h);
-	md_read("../data/c.csv", p->c);
-	p->lambda0 = md_lambda0_f(p->h);
+    gsl_integration_workspace *w = gsl_integration_workspace_alloc(NWSPACE);
     for (uint32_t a = 0; a < size; a++) {
         for (uint32_t b = 0; b < size; b++) {
-            p->Ea = gsl_vector_get(eval, a);
-            p->Eb = gsl_vector_get(eval, b);
-            p->C_baab = transCoeff(evec, b, a, a, b);
-            p->C_aaba = transCoeff(evec, a, a, b, a);
-            p->C_bbba = transCoeff(evec, b, b, b, a);
-            p->C_aaab = transCoeff(evec, a, a, a, b);
-            p->C_bbab = transCoeff(evec, b, b, a, b);
-            p->C_bbaa = transCoeff(evec, b, b, a, a);
-            p->C_aaaa = transCoeff(evec, a, a, a, a);
-            p->C_bbbb = transCoeff(evec, b, b, b, b);
+            if (a == b) {
+                gsl_matrix_set(result, a, b, 0.0);
+            } else {
+                p->Ea = gsl_vector_get(eval, a);
+                p->Eb = gsl_vector_get(eval, b);
+                p->C_baab = transCoeff(evec, b, a, a, b);
+                p->C_aaba = transCoeff(evec, a, a, b, a);
+                p->C_bbba = transCoeff(evec, b, b, b, a);
+                p->C_aaab = transCoeff(evec, a, a, a, b);
+                p->C_bbab = transCoeff(evec, b, b, a, b);
+                p->C_bbaa = transCoeff(evec, b, b, a, a);
+                p->C_aaaa = transCoeff(evec, a, a, a, a);
+                p->C_bbbb = transCoeff(evec, b, b, b, b);
 
-            F.function = &md_kernel_F;
-            F.params = p;
+                F.function = &md_kernel_F;
+                F.params = p;
 
-            gsl_integration_workspace *w =
-                gsl_integration_workspace_alloc(NWSPACE);
+				// gsl_integration_qag(&F, ra, rb, EPSABS*100, EPSREL*100, NWSPACE, 1, w, &element, &abserr);
+                gsl_integration_qags(&F, ra, rb, EPSABS * 100, EPSREL * 100, NWSPACE, w, &element, &abserr);
+                // printf("ABSERR: %f\n", abserr);
 
-            gsl_integration_qags(&F, ra, rb, EPSABS / 100.0, EPSREL / 100.0,
-                                 NWSPACE, w, &element, &abserr);
-            gsl_matrix_set(result, a, b, 2.0 * element / CM2FS);
-            gsl_integration_workspace_free(w);
+				/* transfer the unit from cm to ps-1 */
+				element = 2.0 * element / CM2FS * 1000;
+				// printf("R%d%d: %f ps-1\n", a, b, element * 1000);
+                gsl_matrix_set(result, a, b, element);
+            }
         }
     }
+    gsl_integration_workspace_free(w);
+	printf("unit: ps-1\n");
     gsl_matrix_print(result);
     printf("\n");
 }
